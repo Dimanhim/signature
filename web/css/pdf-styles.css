@@ -1,0 +1,183 @@
+@font-face{
+    font-family:'Arial-light';
+    font-style:normal;
+    src:url(../fonts/Arial/ArialLight.ttf)
+    format("ttf")
+}
+*
+{
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 12px;
+    line-height: 14px;
+    font-family: 'Arial';
+}
+
+h1
+{
+    font-weight: bold;
+    font-size: 12px;
+    line-height: 14px;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial';
+}
+
+h2
+{
+    font-weight: bold;
+   font-size: 12px;
+    line-height: 14px;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial';
+}
+
+p
+{
+    font-size: 12px;
+    line-height: 14px;
+    text-align: justify;
+    margin: 0;
+    padding: 0;
+    font-weight: lighter;
+    font-family: 'Arial-light';
+}
+
+table {
+    width: 100%;
+    border: none;
+}
+
+td {
+    border: none;
+    padding: 3px;
+    font-family: 'Arial-light';
+}
+
+.clear
+{
+    clear: both;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.left_running_title
+{
+    width: 50%;
+    float: left;
+}
+
+.right_running_title
+{
+    width: 50%;
+    float: right;
+}
+
+.underlined
+{
+    border-bottom: 1px solid black;
+}
+
+.non-underlined
+{
+    display: inline-block;
+    margin-bottom: -1px;
+    border-bottom: 1px solid white;
+}
+.helper {
+    font-size: 10px;
+    margin-top: 2px;
+}
+
+.margin_top_20
+{
+    margin-top: 20px;
+}
+
+.margin_top_10
+{
+    margin-top: 10px;
+
+}
+.margin_top_5
+{
+    margin-top: 5px;
+}
+
+.bordered {
+    border: 1px solid black;
+    padding: 10px;
+}
+
+.doc_table td {
+    padding: 3px;
+    vertical-align: top;
+    text-align: justify;
+    font-size: 12px;
+    line-height: 14px;
+}
+
+.doc_table td ul {
+    margin-left: 20px;
+}
+
+.table_without_borders {
+    width: 100%;
+    border: none;
+}
+
+.table_without_borders td {
+    border: none;
+    padding: 5px;
+   font-size: 12px;
+    line-height: 14px;
+}
+
+.table_with_borders {
+    width: 100%;
+    border: 1px solid black;
+   font-size: 12px;
+    line-height: 14px;
+}
+
+.table_with_borders td {
+    padding: 5px;
+    border: 1px solid black;
+   font-size: 12px;
+    line-height: 14px;
+}
+
+.table-services-list {
+    width: 100%
+}
+div, span, big, strong
+{
+    font-family: 'Arial';
+}
+
+table.table-services-list tr th {
+    /*border: 1px solid #333232;*/
+    padding: 5px;
+}
+table.table-services-list {
+    border-collapse: collapse;
+}
+table.table-services-list tr th,
+table.table-services-list tr td
+{
+    border: 1px solid #333232;
+    font-family: 'Arial-light';
+    font-size: 11px;
+}
