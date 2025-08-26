@@ -451,6 +451,7 @@ class Document extends BaseModel
             $data['representative_passport'] = '';
 
             if($parent_id = $data['parent_id']) {
+                sleep(1);
                 $params = [
                     'id' => $parent_id,
                     'with_documents' => true,
