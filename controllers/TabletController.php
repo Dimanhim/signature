@@ -112,4 +112,19 @@ class TabletController extends BaseController
             'model' => $model,
         ]);
     }
+
+    /**
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionSign($id)
+    {
+        $this->layout = 'sign';
+        $model = $this->findModel($id);
+
+        return $this->render('sign', [
+            'model' => $model
+        ]);
+    }
 }

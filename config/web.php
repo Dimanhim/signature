@@ -83,6 +83,7 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'tablet/<id:\d+>' => 'tablet/sign'
             ],
         ],
     ],

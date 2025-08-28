@@ -20,8 +20,8 @@ class ApiResponse
 
     public function getDocuments()
     {
-        $params = Yii::$app->request->get();
-        $tablet_id = isset($params['tablet_id']) ? $params['tablet_id'] : null;
+        $params = Yii::$app->request->post() ?: Yii::$app->request->get() ;
+        $tablet_id = $params['tablet_id'] ?? null;
 
         $data = [];
         if(!$tablet_id) {
@@ -77,7 +77,7 @@ class ApiResponse
                 $document->uploadFile();
                 if(!$document->hasDocumentErrors()) {
                     if($document->saveSignatures($data['signatures'])) {
-                        $this->result['message'] = 'Успешно добавлено '.count($data['signatures']).' подписей, документ сгенерирован';
+                        $this->result['message'] = 'Успешно добавлено '.count($data['signatures']).' подписей, документ отправлен';
                     }
                 }
                 else {
