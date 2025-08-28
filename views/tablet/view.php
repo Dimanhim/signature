@@ -40,6 +40,13 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     ],
                     [
+                        'attribute' => 'URL',
+                        'format' => 'raw',
+                        'value' => function($data) {
+                            return Html::a('<i class="fa fa-check-square-o"></i>', $data->link, ['target' => '_blanc', 'class' => 'url-link', 'title' => 'Перейти в планшет']);
+                        }
+                    ],
+                    [
                         'attribute' => 'is_active',
                         'value' => function($data) {
                             return $data->active;

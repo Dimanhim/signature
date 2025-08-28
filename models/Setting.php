@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "_settings".
@@ -15,7 +16,7 @@ use Yii;
  * @property int|null $created_at
  * @property int|null $updated_at
  */
-class Setting extends BaseModel
+class Setting extends ActiveRecord
 {
     /**
      * {@inheritdoc}

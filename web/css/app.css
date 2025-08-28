@@ -415,3 +415,10 @@ table.dataTable.display tbody tr.odd
     padding-top: 10px;
     text-align: center;
 }
+.url-link {
+    text-decoration: none;
+    font-size: 30px;
+}
+table.table tr > td.td-actions {
+    vertical-align: middle;
+}

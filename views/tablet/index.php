@@ -40,11 +40,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'URL',
                         'format' => 'raw',
                         'value' => function($data) {
-                            return Html::a($data->link, $data->link, ['target' => '_blanc']) ;
+                            return Html::a('<i class="fa fa-check-square-o"></i>', $data->link, ['target' => '_blanc', 'class' => 'url-link', 'title' => 'Перейти в планшет']);
                         }
                     ],
                     [
                         'class' => ActionColumn::className(),
+                        'contentOptions' => [
+                            'class' => 'td-actions'
+                        ],
                         'urlCreator' => function ($action, Tablet $model, $key, $index, $column) {
                             return Url::toRoute([$action, 'id' => $model->id]);
                         }

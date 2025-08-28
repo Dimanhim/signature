@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?= $form->field($model, 'app_name')->textInput()->label('Название приложения') ?>
                         <?= $form->field($model, 'rnova_api_url')->textInput()->label('Адрес API МИС') ?>
                         <?= $form->field($model, 'rnova_api_key')->textInput()->label('Ключ API МИС') ?>
-                        <?= $form->field($model, 'tablet_url')->textInput()->label('Базовый URL планшета') ?>
+                        <!-- <?//= $form->field($model, 'tablet_url')->textInput()->label('Базовый URL планшета') ?>-->
                         <?= $form->field($model, 'document_css')->textarea()->label('CSS-стили документов') ?>
                         <?= $form->field($model, 'tablet_css')->textarea()->label('CSS-стили планшета') ?>
                         <?= $form->field($model, 'cancel_unsigned')->checkbox(['label' => Html::tag('span','Отменять неподписанные документы'), 'labelOptions' => ['class' => 'ui-checkbox']]) ?>

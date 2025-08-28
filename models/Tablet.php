@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 
 use app\models\Setting;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "ec_industries".
@@ -105,6 +106,7 @@ class Tablet extends BaseModel
 
     public function getLink()
     {
+        return Url::to(['tablet/' . $this->id]);
         return Setting::findOne(['key' => 'tablet_url'])->value.$this->id;
     }
 
