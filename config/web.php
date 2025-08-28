@@ -15,7 +15,7 @@ $config = [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
         '@upload' => '@app/web/upload',
-        '@tablet' => '@app/web/tablet/img',
+        '@tablet' => '@app/web/sign/img',
         '@pdf' => '@app/web/pdf',
     ],
     'components' => [

@@ -49,6 +49,7 @@ class SignAsset extends AssetBundle
             'sign/css/simplebar.min.css',
             'sign/css/notie.min.css',
             'sign/css/main.css?v='.mt_rand(1000,10000),
+            'sign/css/custom.css?v='.mt_rand(1000,10000),
         ];
     }
 
