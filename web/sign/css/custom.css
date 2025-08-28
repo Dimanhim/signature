@@ -1,0 +1,17 @@
+.wallpaper img {
+    object-fit: contain;
+}
+.wallpaper__update {
+    background-color: #FDF4D5;
+    border-radius: 81px;
+}
+.btn {
+    background: #DD6F3A;
+}
+.btn--white {
+    background: #fff;
+}
+.btn--dark {
+    background: #8D4421;
+}
+
