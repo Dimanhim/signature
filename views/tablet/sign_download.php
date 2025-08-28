@@ -7,7 +7,7 @@
                         type="button"
                         @click="loadDocument"
                 >
-                    <img src="/tablet/img/reload.svg" alt="">
+                    <img src="/sign/img/reload.svg" alt="">
                 </button>
             </div>
         </section>
