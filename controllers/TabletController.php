@@ -36,10 +36,6 @@ class TabletController extends BaseController
                             'allow' => true,
                             'roles' => ['admin'],
                         ],
-                        [
-                            'allow' => true,
-                            'actions' => ['sign'],
-                        ],
                     ]
                 ],
             ]
