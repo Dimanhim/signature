@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\components\ApiHelper;
+use app\components\Helpers;
 use kartik\mpdf\Pdf;
 use Yii;
 use yii\base\Model;
@@ -314,6 +315,12 @@ class Document extends BaseModel
         return $str;
     }
 
+    public function getPriceFullWordsFromData($price)
+    {
+        if(!$price) return '';
+        return Helpers::num2str($price);
+    }
+
     public function getPriceFullFromData($items)
     {
         $servicePrice = 0;
@@ -413,6 +420,7 @@ class Document extends BaseModel
                     $result['service_list'] = $this->getServicesListFromData($result);
                     $result['price_full'] = $this->getPriceFullFromData($result);
                     $result['user_name_short'] = $result['author_name'];
+                    $result['price_full_words'] = $this->getPriceFullWordsFromData($result['price_full']);
                 }
             }
             return $result;
