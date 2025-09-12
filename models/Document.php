@@ -634,6 +634,7 @@ class Document extends BaseModel
                         'title' => $this->document_name,
                         'patient_id' => $this->patient_id,
                         'type' => 'pdf',
+                        'document_type' => 'admin',
                     ];
                     $response = Yii::$app->api->uploadFile($params);
                     if(!$data = ApiHelper::getDataFromApi($response)) {
