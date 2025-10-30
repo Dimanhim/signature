@@ -1,6 +1,10 @@
 <?php
 
+use app\models\TemplateCustomParams;
+use yii\grid\ActionColumn;
+use yii\grid\GridView;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use app\models\Tablet;
 use kartik\editors\Summernote;
@@ -8,6 +12,8 @@ use kartik\editors\Summernote;
 /** @var yii\web\View $this */
 /** @var app\models\Industry $model */
 /** @var yii\widgets\ActiveForm $form */
+
+$templateId = $model->id;
 ?>
 
 <div class="industry-form">
@@ -26,6 +32,16 @@ use kartik\editors\Summernote;
                 Html
             </a>
         </li>
+
+        <?php if (isset($custom)): ?>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="tab-3" data-toggle="tab" href="#tab-custom" role="tab"
+                   aria-controls="tab-custom"
+                   aria-selected="false">
+                    Пользовательские поля
+                </a>
+            </li>
+        <?php endif; ?>
     </ul>
 
     <div class="tab-content" id="myTabContent">
@@ -54,6 +70,52 @@ use kartik\editors\Summernote;
                 </div>
             </div>
         </div>
+
+        <?php
+        if (isset($custom)): ?>
+            <div class="tab-pane" id="tab-custom" role="tabpanel" aria-labelledby="tab-custom">
+                <div class="card">
+                    <div class="card-body">
+                        <p>
+                            <?= Html::a(
+                                'Добавить',
+                                ['/template/' . $templateId . '/custom-params/create'],
+                                ['class' => 'btn btn-success']
+                            ) ?>
+                        </p>
+                        <?= GridView::widget([
+                            'dataProvider' => $custom,
+                            'columns' => [
+                                ['class' => 'yii\grid\SerialColumn'],
+
+                                'placeholder',
+                                'type' => 'typeName',
+                                'description',
+
+                                [
+                                    'class' => ActionColumn::className(),
+                                    'template' => '{update} {delete}',
+                                    'urlCreator' => function (
+                                        $action,
+                                        TemplateCustomParams $model,
+                                        $key,
+                                        $index,
+                                        $column
+                                    ) use ($templateId) {
+                                        return Url::toRoute(
+                                            [
+                                                '/template/' . $templateId . '/custom-params/' . $action,
+                                                'id' => $model->id
+                                            ]
+                                        );
+                                    }
+                                ],
+                            ],
+                        ]); ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
     <div class="clearfix"></div>
     <div class="col-12">

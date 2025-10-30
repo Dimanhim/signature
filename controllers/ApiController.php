@@ -72,6 +72,7 @@ class ApiController extends Controller
             return [
                 'document_id' => $data['document_id'],
                 'signatures' => $this->getImageData($data['signatures']),
+                'custom' => $data['custom'],
             ];
         }
         return false;
@@ -96,6 +97,7 @@ class ApiController extends Controller
     public function actionGetDocuments()
     {
         $this->api->getDocuments();
+//        \Yii::$app->infoLog->add('documents', $this->api->result['data'][0], 'document.txt');
         return $this->responseValue();
     }
 
@@ -109,9 +111,10 @@ class ApiController extends Controller
     public function actionSetSignatures()
     {
         $data = $this->getRequestParams();
-        \Yii::$app->infoLog->add('data', $data, 'signatures-log.txt');
+//        \Yii::$app->infoLog->add('data', $data, 'signatures-custom-log.txt');
+//        return $this->responseValue();
         if($data) {
-            $this->api->setSignatures($data);
+            $this->api->setContent($data);
         }
         return $this->responseValue();
     }
@@ -127,7 +130,7 @@ class ApiController extends Controller
         // if($this->api->hasErrors()) {
         //     \Yii::$app->infoLog->add('error_message', $this->api->result['error_message'], 'api-logs.txt');
         // }
-        \Yii::$app->infoLog->add('result', $this->api->result, 'signatures-log.txt');
+        //\Yii::$app->infoLog->add('result', $this->api->result, 'signatures-log.txt');
         return $this->api->result;
     }
 

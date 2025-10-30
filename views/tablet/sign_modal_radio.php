@@ -1,4 +1,4 @@
-<template x-if="show_modal">
+<template x-if="show_modal && isTypeRadio">
     <div class="vfm vfm--fixed vfm--inset" style="z-index: 1000;" role="dialog" aria-modal="true">
         <div class="vfm__overlay vfm--overlay vfm--absolute vfm--inset vfm--prevent-none" aria-hidden="true"></div>
         <div class="vfm__content vfm--outline-none" tabindex="0">
@@ -9,15 +9,15 @@
                         <span></span>
                     </button>
                     <div class="modal__wrap">
-                        <div class="modal__sign" @touchstart="hideSignText" @mousedown="hideSignText">
-                            <canvas id="signatureCanvas" class="modal__sign-canvas"></canvas>
-                            <template x-if="show_sign_text">
-                                <p class="modal__sign-text">Место для подписи</p>
-                            </template>
+                        <div class="modal__radio">
+                            <span>Нет</span>
+                            <label class="ui-switch ui-switch-success ui-both">
+                                <input type="checkbox" x-model="radioCustomField"><i></i>
+                            </label>
+                            <span>Да</span>
                         </div>
-                        <div class="modal__btns">
-                            <button class="btn" type="button" @click="saveSignature">Подписать</button>
-                            <button class="btn btn--dark" type="button" @click="clearSignature">Очистить</button>
+                        <div class="modal__btns align-center">
+                            <button class="btn" type="button" @click="saveRadio">Сохранить</button>
                         </div>
                     </div>
                 </div>

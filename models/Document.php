@@ -7,6 +7,7 @@ use kartik\mpdf\Pdf;
 use Yii;
 use yii\base\Model;
 use app\models\Setting;
+use yii\helpers\ArrayHelper;
 
 class Document extends BaseModel
 {
@@ -88,14 +89,21 @@ class Document extends BaseModel
 
     public function afterFind()
     {
+        $this->custom_params = json_decode($this->custom_params, true) ?: [];
+
         return parent::afterFind();
     }
 
     public function beforeSave($insert)
     {
-        if(!$this->user_id) {
+        if (!$this->user_id) {
             $this->user_id = \Yii::$app->user->id;
         }
+
+        if (is_array($this->custom_params)) {
+            $this->custom_params = json_encode($this->custom_params);
+        }
+
         return parent::beforeSave($insert);
     }
 
@@ -108,6 +116,15 @@ class Document extends BaseModel
             }
         }
         return parent::beforeDelete();
+    }
+
+    public function setAvaliablePatterns()
+    {
+        if($customParams = TemplateCustomParams::getListByTemplate($this->template_id)) {
+            foreach($customParams as $customParam) {
+                $this->_avaliable_patterns[] = $customParam['placeholder'];
+            }
+        }
     }
 
     public function getTemplate()
@@ -730,6 +747,56 @@ class Document extends BaseModel
         return $this->content;
     }
 
+    public function setContentWithCustom($data)
+    {
+        if(!isset($data['custom']) || !$data['custom']) return false;
+
+        $data = $this->prepareCustomFields($data['custom']);
+        \Yii::$app->infoLog->add('', $data, 'custom-fields.txt');
+
+//        if($data) {
+//            foreach($data as $placeholder => $placeholderValues) {
+//                // фраза для замены из шаблона
+//                $patternStr = "{$placeholder}";
+//
+//                // получаем контент с {signature_ID} вместо места для подписи
+//                $contentArr = explode($patternStr, $this->content);
+//                $fullContent = '';
+//                if($contentArr) {
+//                    $i = 0;
+//                    foreach($contentArr as $contentPart) {
+//                        if($i == 0) {
+//                            $fullContent .= $contentPart;
+//                        }
+//                        else {
+//                            $pattern = '{custom_'.$i.'}';
+//                            $fullContent .= $pattern.$contentPart;
+//                        }
+//                        $i++;
+//                    }
+//                }
+//                else {
+//                    $fullContent = $this->content;
+//                }
+//                foreach($signaturesPatterns as $signaturePattern => $signaturePath) {
+//                    $fullContent = str_replace($signaturePattern, $signaturePath, $fullContent);
+//                }
+//                $this->content = $fullContent;
+//                return $this->content;
+//            }
+//        }
+
+    }
+
+    public function prepareCustomFields($customFields)
+    {
+        $data = [];
+        foreach($customFields as $fieldId => $fieldValue) {
+            $data[$fieldValue['placeholder']][] = [$fieldValue['id'] => $fieldValue['data']];
+        }
+        return $data;
+    }
+
 
     public function contentWithPatterns($data)
     {
@@ -758,6 +825,7 @@ class Document extends BaseModel
             'patient_id' => $this->patient_id,
             //'patient_email' => $this->patient_email,
             'content' => $this->content,
+            'custom_params' => $this->getCustomParams(),
         ];
     }
 
@@ -843,6 +911,47 @@ class Document extends BaseModel
                     ->attach(\Yii::getAlias('@app/web/').'pdf/'.$this->document_name)
                     ->send();
             }
+        }
+    }
+
+    public function hasAdminCustomParams()
+    {
+        if($this->customParams) {
+            foreach($this->customParams as $customParam) {
+                if(TemplateCustomParams::isAdminParam($customParam['type'])) return true;
+            }
+        }
+        return false;
+    }
+
+    public function getCustomParams()
+    {
+        $tplCustomParams = TemplateCustomParams::getListByTemplate($this->template_id);
+        if ($this->custom_params) {
+            $indexed1 = ArrayHelper::index($tplCustomParams, 'id');
+            $indexed2 = ArrayHelper::index($this->custom_params, 'id');
+            return array_values(array_replace_recursive($indexed1, $indexed2));
+        }
+        return $tplCustomParams;
+    }
+
+    public function getCustomPatterns()
+    {
+        return array_map(function ($param) {
+            return $param['placeholder'];
+        }, $this->customParams);
+    }
+
+    public function applyCustomParams()
+    {
+        foreach ($this->customParams as $param) {
+            if(!TemplateCustomParams::isAdminParam($param['type'])) continue;
+            $this->content = str_replace('{' . $param['placeholder'] . '}', $param['value'], $this->content);
+            $this->full_content = str_replace(
+                '{' . $param['placeholder'] . '}',
+                $param['value'],
+                $this->full_content
+            );
         }
     }
 

@@ -18,6 +18,7 @@ $this->params['breadcrumbs'][] = 'Редактирование';
         <div class="card-body">
             <?= $this->render('_form', [
                 'model' => $model,
+                'custom' => $custom,
             ]) ?>
         </div>
     </div>

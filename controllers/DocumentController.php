@@ -76,6 +76,7 @@ class DocumentController extends BaseController
             //\Yii::$app->infoLog->add('patient', $patient, '__patient-log.txt');
 
             if($appointments and $clinic and $patient) {
+                $model->setAvaliablePatterns();
                 $model->setContent();
                 $model->setFullContent();
                 if($model->checkRequiredFields()) {
@@ -115,6 +116,30 @@ class DocumentController extends BaseController
         return $this->render('list', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionUpdate($id)
+    {
+        $model = $this->findModel($id);
+
+        if ($this->request->isPost) {
+            $customParams = [];
+            foreach ($this->request->post() as $key => $value) {
+                if (is_numeric($key)) {
+                    $customParams[] = ['id' => $key, 'value' => $value];
+                }
+            }
+            file_put_contents('info-log.txt', date('d.m.Y H:i:s').' customParams - '.print_r($customParams, true)."\n", FILE_APPEND);
+            $model->custom_params = $customParams;
+            $model->applyCustomParams();
+            $model->save();
+            Yii::$app->session->setFlash('success', 'Документ успешно сохранен');
+            return $this->redirect(['index']);
+        }
+
+        return $this->render('update', [
+            'model' => $model,
         ]);
     }
 

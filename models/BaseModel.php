@@ -84,7 +84,12 @@ class BaseModel extends ActiveRecord
      */
     public static function findModels()
     {
-        return self::className()::find()->andWhere(['is_active' => 1])->orderBy(['position' => 'SORT ASC']);
+        return self::className()::find()->where(['is_active' => 1])->orderBy(['position' => 'SORT ASC']);
+    }
+
+    public static function findDesc()
+    {
+        return self::className()::find()->where(['is_active' => 1])->orderBy(['id' => SORT_DESC]);
     }
 
     /**

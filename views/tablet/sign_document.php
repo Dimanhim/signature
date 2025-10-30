@@ -30,3 +30,18 @@
         </main>
     </div>
 </template>
+
+<style>
+    .doc__content .btn.btn--sm {
+        padding: 5px 24px 5px 14px;
+        font-size: 16px;
+    }
+    .doc__content .btn.btn--sm::before {
+        width: 23px;
+        height: 24px;
+    }
+    .doc__content .btn.btn--sm {
+        min-height: 62px;
+        margin: 5px 0;
+    }
+</style>

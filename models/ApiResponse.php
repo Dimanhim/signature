@@ -58,7 +58,12 @@ class ApiResponse
         }
     }
 
-    public function setSignatures($data)
+    public function setData()
+    {
+
+    }
+
+    public function setContent($data)
     {
         // здесь отправляем емейл, если send_email установлен в true
         if(isset($data['document_id'])) {
@@ -70,6 +75,8 @@ class ApiResponse
                 $this->addError('Документ уже подписан');
                 return $this->result;
             }
+            $document->setContentWithCustom($data);
+            return;
             if(isset($data['signatures'])) {
                 $document->contentWithSignatures($data['signatures']);
                 $document->contentWithPatterns($data);

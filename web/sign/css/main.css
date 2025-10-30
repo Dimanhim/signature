@@ -599,6 +599,78 @@ template {
     box-shadow: 0 0 5px 0 rgba(0, 0, 0, .5)
 }
 
+.modal__text {
+
+}
+.modal__text input {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    height: 80px;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    border-radius: 20px;
+    border: 2px solid #d4d6db;
+    font-size: 22px;
+}
+
+.modal__radio {
+    display: flex;
+    justify-content: center;
+}
+.modal__radio span {
+    font-size: 49px;
+}
+.ui-switch {
+    display: inline-block;
+    margin: 0 24px;
+}
+.ui-switch.ui-both.ui-switch-success i
+{
+    box-shadow: none;
+    background: #ccc;
+}
+.ui-switch input {
+    display: none;
+}
+.ui-switch i {
+    display: inline-block;
+    cursor: pointer;
+    padding-right: 98px;
+    -webkit-transition: all ease .2s;
+    -moz-transition: all ease .2s;
+    transition: all ease .2s;
+    border-radius: 49px;
+    box-shadow: inset 0 0 1px rgba(0,0,0,.5);
+}
+.ui-switch :checked + i {
+    padding-right: 0;
+    padding-left: 98px;
+    box-shadow: inset 0 0 1px rgba(0,0,0,.5),inset 0 0 40px #45ac55;
+}
+.ui-switch i::before {
+    display: block;
+    content: '';
+    width: 98px;
+    height: 98px;
+    border-radius: 49px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,.5);
+}
+.ui-switch.ui-both.ui-switch-success i
+{
+    box-shadow: none;
+    background: #ccc;
+}
+.ui-switch.ui-both.ui-switch-success :checked + i
+{
+    background: #45ac55;
+}
+.align-center {
+    justify-content: center;
+}
+
+
 @media screen and (max-width: 900px) {
     .notie-container {
         font-size: 1.4rem

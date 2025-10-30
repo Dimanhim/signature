@@ -184,5 +184,10 @@ div.required label.control-label::after {
 .action-column a:first-child {
     margin-left: 0;
 }
+.document-list .action-column a {
+    display: block;
+    margin: 0;
+    padding: 3px 0;
+}
 
 
