@@ -88,6 +88,9 @@ class DocumentController extends BaseController
                         $model->generatePdf(true);
                         $model->cancelDocuments();
                         $btn = '<a href="/pdf/'.$model->document_name.'" class="btn btn-sm btn-primary" target="_blank">Скачать</a>';
+                        if($model->hasCustomParams()) {
+                            $btn .= '<a href="/document/update/?id='.$model->id.'" class="btn btn-sm btn-warning" style="margin-left: 10px;">Заполнить параметры</a>';
+                        }
                         Yii::$app->session->setFlash('success', 'Документ успешно отправлен на планшет '.$btn);
                     }
 
@@ -130,7 +133,6 @@ class DocumentController extends BaseController
                     $customParams[] = ['id' => $key, 'value' => $value];
                 }
             }
-            file_put_contents('info-log.txt', date('d.m.Y H:i:s').' customParams - '.print_r($customParams, true)."\n", FILE_APPEND);
             $model->custom_params = $customParams;
             $model->applyCustomParams();
             $model->save();

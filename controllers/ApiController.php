@@ -111,8 +111,6 @@ class ApiController extends Controller
     public function actionSetSignatures()
     {
         $data = $this->getRequestParams();
-//        \Yii::$app->infoLog->add('data', $data, 'signatures-custom-log.txt');
-//        return $this->responseValue();
         if($data) {
             $this->api->setContent($data);
         }
@@ -127,10 +125,10 @@ class ApiController extends Controller
 
     private function responseValue()
     {
-        // if($this->api->hasErrors()) {
-        //     \Yii::$app->infoLog->add('error_message', $this->api->result['error_message'], 'api-logs.txt');
-        // }
-        //\Yii::$app->infoLog->add('result', $this->api->result, 'signatures-log.txt');
+//         if($this->api->hasErrors()) {
+//             \Yii::$app->infoLog->add('error_message', $this->api->result['error_message'], 'api-logs.txt');
+//         }
+        \Yii::$app->infoLog->add('result', $this->api->result, 'signatures-log.txt');
         return $this->api->result;
     }
 

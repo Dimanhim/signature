@@ -58,11 +58,6 @@ class ApiResponse
         }
     }
 
-    public function setData()
-    {
-
-    }
-
     public function setContent($data)
     {
         // здесь отправляем емейл, если send_email установлен в true
@@ -76,7 +71,6 @@ class ApiResponse
                 return $this->result;
             }
             $document->setContentWithCustom($data);
-            return;
             if(isset($data['signatures'])) {
                 $document->contentWithSignatures($data['signatures']);
                 $document->contentWithPatterns($data);

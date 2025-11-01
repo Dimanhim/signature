@@ -747,52 +747,61 @@ class Document extends BaseModel
         return $this->content;
     }
 
+    protected function getCustomByIndex($customValues, $index)
+    {
+        $i = 1;
+        foreach($customValues as $pattern => $value) {
+            if($i == $index) {
+                return "{" . $pattern . "}";
+            }
+            $i++;
+        }
+        return null;
+    }
+
     public function setContentWithCustom($data)
     {
         if(!isset($data['custom']) || !$data['custom']) return false;
-
         $data = $this->prepareCustomFields($data['custom']);
-        \Yii::$app->infoLog->add('', $data, 'custom-fields.txt');
 
-//        if($data) {
-//            foreach($data as $placeholder => $placeholderValues) {
-//                // фраза для замены из шаблона
-//                $patternStr = "{$placeholder}";
-//
-//                // получаем контент с {signature_ID} вместо места для подписи
-//                $contentArr = explode($patternStr, $this->content);
-//                $fullContent = '';
-//                if($contentArr) {
-//                    $i = 0;
-//                    foreach($contentArr as $contentPart) {
-//                        if($i == 0) {
-//                            $fullContent .= $contentPart;
-//                        }
-//                        else {
-//                            $pattern = '{custom_'.$i.'}';
-//                            $fullContent .= $pattern.$contentPart;
-//                        }
-//                        $i++;
-//                    }
-//                }
-//                else {
-//                    $fullContent = $this->content;
-//                }
-//                foreach($signaturesPatterns as $signaturePattern => $signaturePath) {
-//                    $fullContent = str_replace($signaturePattern, $signaturePath, $fullContent);
-//                }
-//                $this->content = $fullContent;
-//                return $this->content;
-//            }
-//        }
+        if($data) {
+            foreach($data as $placeholder => $placeholderValues) {
+                // фраза для замены из шаблона
+                $patternStr = "{" . $placeholder . "}";
 
+                // получаем контент с {custom_ID} вместо кастомного поля
+                $contentArr = explode($patternStr, $this->content);
+                $fullContent = '';
+                if($contentArr) {
+                    $i = 0;
+                    foreach($contentArr as $contentPart) {
+                        if($i == 0) {
+                            $fullContent .= $contentPart;
+                        }
+                        else {
+                            $pattern = $this->getCustomByIndex($placeholderValues, $i);
+                            $fullContent .= $pattern.$contentPart;
+                        }
+                        $i++;
+                    }
+                }
+                else {
+                    $fullContent = $this->content;
+                }
+                foreach($placeholderValues as $pattern => $value) {
+                    $fullContent = str_replace("{" . $pattern . "}", $value, $fullContent);
+                }
+                $this->content = $fullContent;
+            }
+        }
+        return $this->content;
     }
 
     public function prepareCustomFields($customFields)
     {
         $data = [];
         foreach($customFields as $fieldId => $fieldValue) {
-            $data[$fieldValue['placeholder']][] = [$fieldValue['id'] => $fieldValue['data']];
+            $data[$fieldValue['placeholder']][$fieldValue['id']] = $fieldValue['data'];
         }
         return $data;
     }
@@ -851,6 +860,20 @@ class Document extends BaseModel
 
         //$model->full_content = preg_replace($pattern, '', $model->full_content);
         //$model->content = preg_replace($pattern, '', $model->content);
+    }
+
+    public function hasCustomParams()
+    {
+        if(!$this->template) return false;
+
+        $customParams = TemplateCustomParams::getListByTemplate($this->template_id);
+
+        foreach($customParams as $customParam) {
+            $placeholder = $customParam['placeholder'];
+            if(preg_match("/{$placeholder}/", $this->content)) return true;
+        }
+
+        return false;
     }
 
     public function getAppointmentErrorMessage()
@@ -954,11 +977,4 @@ class Document extends BaseModel
             );
         }
     }
-
-
-
-
-
-
-
 }
