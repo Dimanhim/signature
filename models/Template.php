@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "ec_industries".
@@ -59,6 +60,7 @@ class Template extends BaseModel
             [['name'], 'string', 'max' => 255],
             [['params'], 'safe'],
             [['content'], 'string'],
+            [['clinic_ids'], 'safe'],
         ]);
     }
 
@@ -70,16 +72,44 @@ class Template extends BaseModel
         return array_merge(parent::attributeLabels(), [
             'name' => 'Название',
             'params' => 'Параметры',
+            'clinic_ids' => 'Доступно для филиалов',
         ]);
+    }
+
+    public function beforeSave($insert)
+    {
+        if (is_array($this->clinic_ids)) {
+            $this->clinic_ids = json_encode($this->clinic_ids);
+        }
+        return parent::beforeSave($insert);
     }
 
     public function afterFind()
     {
         $this->setParams();
-        if(!$this->content) {
+        if (!$this->content) {
             $this->content = Yii::$app->controller->renderPartial('//document/_document_content');
         }
+
+        $this->clinic_ids = json_decode($this->clinic_ids, true) ?: [];
+
         return parent::afterFind();
+    }
+
+    public static function getListForCurrentUser()
+    {
+        $userId = Yii::$app->user->id;
+
+        $userClinicId = User::findOne(['id' => $userId])->clinic_id;
+
+        if (!$userClinicId) {
+            return self::getList();
+        }
+
+        $templates = self::find()
+            ->where(['regexp', 'clinic_ids', '"' . $userClinicId . '"'])
+            ->all();
+        return ArrayHelper::map($templates, 'id', 'name');
     }
 
     public static function getParamsArray()
@@ -176,9 +206,11 @@ class Template extends BaseModel
     public static function paramNameByMis($mis_name)
     {
         $params = self::getParamsArray();
-        foreach($params as $groupName) {
-            foreach($groupName as $group_mis_name => $group_param_name) {
-                if($group_mis_name == $mis_name) return $group_param_name;
+        foreach ($params as $groupName) {
+            foreach ($groupName as $group_mis_name => $group_param_name) {
+                if ($group_mis_name == $mis_name) {
+                    return $group_param_name;
+                }
             }
         }
         return false;
@@ -187,8 +219,8 @@ class Template extends BaseModel
     public function setParams()
     {
         $templateParams = TemplateParams::findAll(['template_id' => $this->id]);
-        if($templateParams) {
-            foreach($templateParams as $templateParam) {
+        if ($templateParams) {
+            foreach ($templateParams as $templateParam) {
                 $this->params[$templateParam->param_name]['use'] = 1;
                 $this->params[$templateParam->param_name]['required'] = $templateParam->required;
             }
@@ -198,8 +230,8 @@ class Template extends BaseModel
     public function saveParams()
     {
         TemplateParams::deleteAll(['template_id' => $this->id]);
-        if($this->params) {
-            foreach($this->params as $paramName => $paramValues) {
+        if ($this->params) {
+            foreach ($this->params as $paramName => $paramValues) {
                 $this->addParam($paramName, $paramValues['required']);
             }
         }
@@ -214,8 +246,6 @@ class Template extends BaseModel
         $model->required = $paramRequired;
         return $model->save();
     }
-
-
 
 
 }

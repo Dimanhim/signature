@@ -57,8 +57,10 @@ class User extends BaseModel implements \yii\web\IdentityInterface
     public function rules()
     {
         return array_merge(parent::rules(), [
-            [['username', 'password'], 'required'],
+            [['username'], 'required'],
+            [['password'], 'required', 'on' => 'create'],
             [['username', 'password', 'password_hash', 'email'], 'string', 'max' => 255],
+            [['clinic_id', 'default_tablet_id'], 'safe'],
             [['status'], 'integer'],
         ]);
     }
@@ -74,6 +76,8 @@ class User extends BaseModel implements \yii\web\IdentityInterface
             'password' => 'Пароль',
             'email' => 'E-mail',
             'status' => 'Статус',
+            'clinic_id' => 'Филиал',
+            'default_tablet_id' => 'Планшет по умолчанию',
         ]);
     }
 
@@ -148,11 +152,10 @@ class User extends BaseModel implements \yii\web\IdentityInterface
 
     public function beforeSave($insert)
     {
-        if($this->password) {
+        if ($this->password) {
             $this->password_hash = \Yii::$app->security->generatePasswordHash($this->password);
-            $this->password = '';
         }
-        if(!$this->auth_key) {
+        if (!$this->auth_key) {
             $this->auth_key = Yii::$app->security->generateRandomString();
         }
         return parent::beforeSave($insert);
@@ -173,20 +176,38 @@ class User extends BaseModel implements \yii\web\IdentityInterface
         $manager = $auth->getRole('manager');
         $auth->assign($manager, $this->id);
     }
+
     public function getRoleName()
     {
         $roles = Yii::$app->authManager->getRolesByUser($this->id);
-        if($roles) {
-            foreach($roles as $role) {
+        if ($roles) {
+            foreach ($roles as $role) {
                 return $role->description;
             }
         }
         return false;
     }
+
+    public function getClinicName()
+    {
+        $clinics = Api::getClinicsList();
+        if ($this->clinic_id and isset($clinics[$this->clinic_id])) {
+            return $clinics[$this->clinic_id];
+        }
+        return false;
+    }
+
+    public function getDefaultTabletName()
+    {
+        $tablet = Tablet::findOne($this->default_tablet_id);
+        return $tablet ? $tablet->name : '';
+    }
+
     public static function isAdmin()
     {
         return Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
     }
+
     public static function isManager()
     {
         return Yii::$app->authManager->getAssignment('manager', Yii::$app->user->id);

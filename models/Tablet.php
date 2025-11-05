@@ -3,8 +3,7 @@
 namespace app\models;
 
 use Yii;
-
-use app\models\Setting;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 
 /**
@@ -73,35 +72,37 @@ class Tablet extends BaseModel
         ]);
     }
 
-    public static function getClinicsList()
-    {
-        $data = [];
-        $api = new Api();
-        $clinicsJson = $api->getClinics();
-        //\Yii::$app->infoLog->add('$clinicsJson', $clinicsJson);
-        if($clinicsJson and ($clinics = json_decode($clinicsJson, true)) and isset($clinics['data']) and $clinics['data']) {
-            foreach($clinics['data'] as $clinic) {
-                if(isset($clinic['id']) and isset($clinic['title'])) {
-                    $data[$clinic['id']] = $clinic['title'];
-                }
-            }
-        }
-        return $data;
-        return [
-            1 => 'Филиал 1',
-            2 => 'Филиал 2',
-            3 => 'Филиал 3',
-            4 => 'Филиал 4',
-        ];
-    }
-
     public function getClinicName()
     {
-        $clinics = self::getClinicsList();
-        if($this->clinic_id and isset($clinics[$this->clinic_id])) {
+        $clinics = Api::getClinicsList();
+        if ($this->clinic_id and isset($clinics[$this->clinic_id])) {
             return $clinics[$this->clinic_id];
         }
         return false;
+    }
+
+    public static function getListForCurrentUser()
+    {
+        $userId = Yii::$app->user->id;
+
+        $userClinicId = User::findOne(['id' => $userId])->clinic_id;
+
+        if (!$userClinicId) {
+            return self::getList();
+        }
+
+        $tablets = self::find()
+            ->where(['clinic_id' => $userClinicId])
+            ->all();
+        return ArrayHelper::map($tablets, 'id', 'name');
+    }
+
+    public static function getDefaultForCurrentUser()
+    {
+        $userId = Yii::$app->user->id;
+        $user = User::findOne(['id' => $userId]);
+
+        return $user->default_tablet_id;
     }
 
     public function getLink()
@@ -109,8 +110,6 @@ class Tablet extends BaseModel
         return Url::to(['tablet/' . $this->id]);
         return Setting::findOne(['key' => 'tablet_url'])->value.$this->id;
     }
-
-
 
 
 }

@@ -1,5 +1,6 @@
 <?php
 
+use app\models\Api;
 use app\models\TemplateCustomParams;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
@@ -52,6 +53,16 @@ $templateId = $model->id;
                 <div class="card-body">
                     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
                     <?= $form->field($model, 'is_active')->checkbox(['label' => Html::tag('span','Активность'), 'labelOptions' => ['class' => 'ui-checkbox']]) ?>
+                    <?= $form->field($model, 'clinic_ids')->dropDownList(
+                        Api::getClinicsList(),
+                        [
+                            'multiple' => true,
+                            'size' => 7,
+                        ]
+                    ) ?>
+                    <div class="form-group mt10">
+                        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
+                    </div>
                     <?= $this->render('_params', [
                         'model' => $model,
                         'form' => $form,
