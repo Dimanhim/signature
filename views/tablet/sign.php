@@ -30,7 +30,13 @@ $tablet_css = Setting::getValueByName('tablet_css');
         'model' => $model
     ]); ?>
 
-    <?= $this->render('sign_loader'); ?>
+    <?= $this->render('sign_loader', [
+        'model' => $model
+    ]); ?>
+
+    <?= $this->render('sign_styles', [
+        'model' => $model,
+    ]) ?>
 
 </div>
 
@@ -80,6 +86,7 @@ $tablet_css = Setting::getValueByName('tablet_css');
                 if(!this.update_on_demand) {
                     this.loadDocument();
                 }
+                this.initCustomImages();
             },
 
             isTemplate(templateName) {
@@ -447,6 +454,78 @@ $tablet_css = Setting::getValueByName('tablet_css');
             isTypeRadio() {
                 return this.type === 'radio';
             },
+
+
+
+
+            // CUSTOM
+            clinicId: <?= $model->clinic_id ?>,
+            reloadPath: '/sign/img/reload.svg',
+            logoPath: '/sign/img/logo.svg',
+            logoBgPath: '/sign/img/logo-bg.svg',
+            checkPath: null,
+
+            customImages: [
+                {
+                    id: 1,
+                    title: 'Альфа Проф',
+                    reload: '/custom/alfa/img/prof/reload.svg',
+                    logo: '/custom/alfa/img/prof/logo.svg',
+                    logoBg: '/custom/alfa/img/prof/logo-bg.png',
+                    check: '/custom/alfa/img/prof/check.svg',
+                },
+                {
+                    id: 2,
+                    title: 'Альфа',
+                    reload: '/custom/alfa/img/alfa/reload.svg',
+                    logo: '/custom/alfa/img/alfa/logo.svg',
+                    logoBg: '/custom/alfa/img/alfa/logo-bg.svg',
+                    check: '/custom/alfa/img/alfa/check.svg',
+                },
+                {
+                    id: 3,
+                    title: 'Альфа Kids',
+                    reload: '/custom/alfa/img/kids/reload.svg',
+                    logo: '/custom/alfa/img/kids/logo.svg',
+                    logoBg: '/custom/alfa/img/kids/logo-bg.png',
+                    check: '/custom/alfa/img/kids/check.svg',
+                },
+                {
+                    id: 4,
+                    title: '3К',
+                    reload: '/custom/alfa/img/3k/reload.svg',
+                    logo: '/custom/alfa/img/3k/logo.svg',
+                    logoBg: '/custom/alfa/img/3k/logo-bg.svg',
+                    check: '/custom/alfa/img/3k/check.svg',
+                },
+                {
+                    id: 6,
+                    title: 'Альфа Линия',
+                    reload: '/custom/alfa/img/line/reload.svg',
+                    logo: '/custom/alfa/img/line/logo.svg',
+                    logoBg: null,
+                    check: '/custom/alfa/img/line/check.svg',
+                },
+                {
+                    id: 7,
+                    title: 'Альфа Смайл',
+                    reload: '/custom/alfa/img/smile/reload.svg',
+                    logo: '/custom/alfa/img/smile/logo.svg',
+                    logoBg: null,
+                    check: '/custom/alfa/img/smile/check.svg',
+                },
+            ],
+
+            initCustomImages() {
+                let clinics = Object.values(this.customImages).filter((item) => item.id === this.clinicId), clinic;
+                if(clinics.length) {
+                    clinic = clinics[0];
+                    this.reloadPath = clinic.reload;
+                    this.logoPath = clinic.logo;
+                    this.logoBgPath = clinic.logoBg;
+                }
+            },
+
         }))
     });
 </script>

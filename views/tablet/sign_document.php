@@ -3,7 +3,7 @@
         <header class="header">
             <div class="container">
                 <div class="header__wrap">
-                    <div class="header__logo"><img src="/sign/img/logo.svg" alt=""></div>
+                    <div class="header__logo"><img :src="logoPath" alt=""></div>
                     <p> Планшет №<b x-html="tabletId"></b></p></div>
             </div>
         </header>
