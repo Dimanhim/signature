@@ -29,15 +29,6 @@ class TabletController extends BaseController
                         'delete' => ['POST'],
                     ],
                 ],
-                'access' => [
-                    'class' => AccessControl::className(),
-                    'rules' => [
-                        [
-                            'allow' => true,
-                            'roles' => ['admin'],
-                        ],
-                    ]
-                ],
             ]
         );
     }
