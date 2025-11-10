@@ -633,7 +633,7 @@ class Document extends BaseModel
         $pdf->cssInline = Setting::findOne(['key' => 'document_css'])->value ?? '';
 
         $dopText = $empty ? '_empty' : '';
-        $documentName = $this->id.'_'.date('d.m.y', $this->created_at).'_'.mt_rand(10000,100000).$dopText.'.pdf';
+        $documentName = $this->id.'_'.$this->template->cutName.'_'.date('d.m.y', $this->created_at).'_'.mt_rand(10000,100000).$dopText.'.pdf';
         $pdf->filename = 'pdf/'.$documentName;
         $this->document_name = $documentName;
         $this->save();
