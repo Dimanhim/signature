@@ -920,6 +920,13 @@ class Document extends BaseModel
         Document::updateAll(['canceled' => 1], ['and', ['!=', 'id', $this->id], ['=', 'tablet_id',  $this->tablet_id]]);
     }
 
+    public function cancelDocument()
+    {
+        if(!Setting::findOne(['key' => 'cancel_unsigned'])->value) return false;
+        $this->canceled = 1;
+        return $this->update();
+    }
+
     public function sendDocEmail($data)
     {
         return true;

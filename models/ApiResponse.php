@@ -45,6 +45,27 @@ class ApiResponse
         }
     }
 
+    public function cancelDocument()
+    {
+        $params = Yii::$app->request->post();
+        $documentId = $params['document_id'] ?? null;
+        if(!$documentId) {
+            $this->addError('Произошла ошибка, попробуйте позднее');
+            return $this->result;
+        }
+        $document = Document::findOne($documentId);
+        if(!$document) {
+            $this->addError('Документ не найден, попробуйте позднее');
+            return $this->result;
+        }
+        $cancel = $document->cancelDocument();
+        if(!$cancel) {
+            $this->addError('Ошибка отмены документа');
+            return $this->result;
+        }
+        return $this->result;
+    }
+
     public function getSettings() {
         $settings = Setting::findAll(['available_for_api' => '1']);
         $data = [];

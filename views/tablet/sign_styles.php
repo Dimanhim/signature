@@ -101,7 +101,8 @@
         font-weight: 600 !important;
     }
     .modal__btns .btn,
-    .doc__btn .btn
+    .doc__btn .btn,
+    .doc__btn .btn__cancel.btn
     {
         background: <?= $bg ?> !important;
     }

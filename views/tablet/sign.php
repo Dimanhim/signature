@@ -66,7 +66,7 @@ $tablet_css = Setting::getValueByName('tablet_css');
             template: 'download',
             signatures: {},
             custom: {},
-            currentSignatureId: null,
+            currentSignatureId: -null,
             currentCustom: null,
             total_signatures: 0,
             total_custom: 0,
@@ -167,6 +167,7 @@ $tablet_css = Setting::getValueByName('tablet_css');
                             this.setTemplate('document')
                         }
                         this.loaderOff();
+                        console.log('document_id', this.document_id)
                     }
                     else {
                         notie.alert({
@@ -525,7 +526,24 @@ $tablet_css = Setting::getValueByName('tablet_css');
                     this.logoBgPath = clinic.logoBg;
                 }
             },
+            cancelDocument() {
+                if(!confirm('Вы действительно хотите отменить документ?')) return;
 
+                this.loaderOn();
+                const params = new URLSearchParams();
+                params.set('document_id', this.document_id);
+
+                const response = this.loadData('cancel-document', params)
+
+                response.then((data) => {
+                    this.setTemplate('download')
+                    notie.alert({
+                        type: 'success',
+                        text: 'Документ успешно отменен',
+                    });
+                    this.loaderOff();
+                });
+            },
         }))
     });
 </script>
