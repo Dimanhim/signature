@@ -96,6 +96,11 @@ class Template extends BaseModel
         return parent::afterFind();
     }
 
+    public function getCutName()
+    {
+        return str_replace(' ', '_', $this->name);
+    }
+
     public static function getListForCurrentUser()
     {
         $userId = Yii::$app->user->id;
