@@ -54,10 +54,11 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         //'brandUrl' => Setting::findOne(['key' => 'app_name'])->value,
         'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
     ]);
-    $items = [];
+    $items = [
+        ['label' => 'Создать документ', 'url' => ['document/index']],
+        ['label' => 'Планшеты', 'url' => ['tablet/index']],
+    ];
     if(User::isAdmin()) {
-        $items[] = ['label' => 'Создать документ', 'url' => ['document/index']];
-        $items[] = ['label' => 'Планшеты', 'url' => ['tablet/index']];
         $items[] = ['label' => 'Шаблоны', 'url' => ['template/index']];
         $items[] = ['label' => 'Пользователи', 'url' => ['user/index']];
         $items[] = ['label' => 'Настройки', 'url' => ['settings/index']];

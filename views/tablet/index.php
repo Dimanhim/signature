@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use himiklab\sortablegrid\SortableGridView;
+use app\models\User;
 
 /** @var yii\web\View $this */
 /** @var app\models\IndustrySearch $searchModel */
@@ -22,10 +23,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
             </p>
 
-            <?= SortableGridView::widget([
-                'dataProvider' => $dataProvider,
-                'filterModel' => $searchModel,
-                'columns' => [
+            <?php
+                $columns = [
                     ['class' => 'yii\grid\SerialColumn'],
 
                     'name',
@@ -33,7 +32,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'clinic_id',
                         'value' => function($data) {
                             return $data->clinicName;
-                            return '123';
                         }
                     ],
                     [
@@ -42,8 +40,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         'value' => function($data) {
                             return Html::a('<i class="fa fa-check-square-o"></i>', $data->link, ['target' => '_blanc', 'class' => 'url-link', 'title' => 'Перейти в планшет']);
                         }
-                    ],
-                    [
+                    ]
+                ];
+                if(User::isAdmin()) {
+                    $columns[] = [
                         'class' => ActionColumn::className(),
                         'contentOptions' => [
                             'class' => 'td-actions'
@@ -51,8 +51,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         'urlCreator' => function ($action, Tablet $model, $key, $index, $column) {
                             return Url::toRoute([$action, 'id' => $model->id]);
                         }
-                    ],
-                ],
+                    ];
+                }
+            ?>
+
+            <?= SortableGridView::widget([
+                'dataProvider' => $dataProvider,
+                'filterModel' => $searchModel,
+                'columns' => $columns
             ]); ?>
         </div>
     </div>
