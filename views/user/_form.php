@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use app\models\Api;
 use app\models\Tablet;
+use app\models\User;
 
 /** @var yii\web\View $this */
 /** @var app\models\User $model */
@@ -22,6 +23,9 @@ use app\models\Tablet;
                     <?= $form->field($model, 'username')->textInput(['maxlength' => true]) ?>
                     <?= $form->field($model, 'password')->textInput(['maxlength' => true]) ?>
                     <?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'role')->dropDownList(
+                        User::getRoleList()
+                    ) ?>
                     <?= $form->field($model, 'clinic_id')->dropDownList(
                         Api::getClinicsList(),
                         ['prompt' => '[Не выбрано]']
