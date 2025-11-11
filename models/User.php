@@ -7,6 +7,7 @@ use Yii;
 class User extends BaseModel implements \yii\web\IdentityInterface
 {
     public $accessToken;
+    public $role;
 
     private static $users = [
         '100' => [
@@ -59,7 +60,7 @@ class User extends BaseModel implements \yii\web\IdentityInterface
         return array_merge(parent::rules(), [
             [['username'], 'required'],
             [['password'], 'required', 'on' => 'create'],
-            [['username', 'password', 'password_hash', 'email'], 'string', 'max' => 255],
+            [['username', 'password', 'password_hash', 'email', 'role'], 'string', 'max' => 255],
             [['clinic_id', 'default_tablet_id'], 'safe'],
             [['status'], 'integer'],
         ]);
@@ -74,6 +75,7 @@ class User extends BaseModel implements \yii\web\IdentityInterface
             'username' => 'Логин',
             'password_hash' => 'Пароль',
             'password' => 'Пароль',
+            'role' => 'Роль',
             'email' => 'E-mail',
             'status' => 'Статус',
             'clinic_id' => 'Филиал',
@@ -161,11 +163,22 @@ class User extends BaseModel implements \yii\web\IdentityInterface
         return parent::beforeSave($insert);
     }
 
+    public function afterFind()
+    {
+        $auth = Yii::$app->authManager;
+        $userRoles = $auth->getRolesByUser($this->id);
+        $this->role = $userRoles[array_key_first($userRoles)]->name ?? null;
+        return parent::afterFind();
+    }
+
     public function afterSave($insert, $changedAttributes)
     {
         $roles = Yii::$app->authManager->getRolesByUser($this->id);
         if (!$roles) {
             $this->createRole();
+        }
+        else {
+            $this->updateRole();
         }
         return parent::afterSave($insert, $changedAttributes);
     }
@@ -173,8 +186,18 @@ class User extends BaseModel implements \yii\web\IdentityInterface
     public function createRole()
     {
         $auth = Yii::$app->authManager;
-        $manager = $auth->getRole('manager');
-        $auth->assign($manager, $this->id);
+        $roleName = $this->role ?? 'manager';
+        $role = $auth->getRole($roleName);
+        $auth->assign($role, $this->id);
+    }
+
+    public function updateRole()
+    {
+        $auth = Yii::$app->authManager;
+        $roleName = $this->role ?? 'manager';
+        $auth->revokeAll($this->id);
+        $role = $auth->getRole($roleName);
+        $auth->assign($role, $this->id);
     }
 
     public function getRoleName()
@@ -211,5 +234,37 @@ class User extends BaseModel implements \yii\web\IdentityInterface
     public static function isManager()
     {
         return Yii::$app->authManager->getAssignment('manager', Yii::$app->user->id);
+    }
+
+    public static function isTablet()
+    {
+        return Yii::$app->authManager->getAssignment('tablet', Yii::$app->user->id);
+    }
+
+    public static function getRoleList()
+    {
+        $roleList = [];
+        if($roles = \Yii::$app->authManager->getRoles()) {
+            foreach($roles as $roleValues) {
+                $roleList[$roleValues->name] = $roleValues->description;
+            }
+        }
+        if(!isset($roleList['tablet'])) {
+            $auth = Yii::$app->authManager;
+            $tablet = $auth->createRole('tablet');
+            $tablet->description = 'Планшет';
+            $auth->add($tablet);
+            return self::getRoleList();
+        }
+        return $roleList;
+    }
+
+    public static function getTemplateLink()
+    {
+        if($user = self::findIdentity(Yii::$app->user->identity->id)) {
+            return '/tablet/' . $user->default_tablet_id;
+        }
+
+        return '/tablet/';
     }
 }

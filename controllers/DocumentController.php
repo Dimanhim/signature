@@ -18,6 +18,15 @@ use yii\web\Controller;
 
 class DocumentController extends BaseController
 {
+
+    public function beforeAction($action)
+    {
+        $isTablet = User::isTablet();
+        if($isTablet) {
+            return $this->redirect(User::getTemplateLink());
+        }
+        return parent::beforeAction($action);
+    }
     /**
      * @inheritDoc
      */
