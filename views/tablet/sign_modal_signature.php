@@ -16,8 +16,8 @@
                             </template>
                         </div>
                         <div class="modal__btns">
-                            <button class="btn" type="button" @click="saveSignature">Подписать</button>
-                            <button class="btn btn--dark" type="button" @click="clearSignature">Очистить</button>
+                            <button class="btn" type="button" @click="clearSignature">Очистить</button>
+                            <button class="btn btn--dark" type="button" @click="saveSignature">Подписать</button>
                         </div>
                     </div>
                 </div>
