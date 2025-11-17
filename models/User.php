@@ -59,6 +59,7 @@ class User extends BaseModel implements \yii\web\IdentityInterface
     {
         return array_merge(parent::rules(), [
             [['username'], 'required'],
+            [['username'], 'unique'],
             [['password'], 'required', 'on' => 'create'],
             [['username', 'password', 'password_hash', 'email', 'role'], 'string', 'max' => 255],
             [['clinic_id', 'default_tablet_id'], 'safe'],
