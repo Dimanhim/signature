@@ -19,11 +19,8 @@ Thumbs.db
 /vagrant
 /runtime
 
-# composer itself is not needed
+# composer itself is not neededs
 composer.phar
-
-# composer lock
-composer.lock
 
 # Mac DS_Store Files
 .DS_Store
