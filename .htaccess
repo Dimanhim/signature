@@ -6,5 +6,5 @@ RewriteCond %{REQUEST_FILE} !-l
 RewriteCond %{REQUEST_URI} !^/web [NC]
 RewriteRule ^(.+)$ /web/$1 [L]
 
-#RewriteCond %{HTTPS} on
-#RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+RewriteCond %{HTTPS} on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
