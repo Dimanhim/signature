@@ -48,18 +48,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     ],
                     [
-                        'attribute' => 'clinic_id',
-                        'value' => function ($data) {
-                            return $data->clinicName;
-                        }
-                    ],
-                    [
-                        'attribute' => 'default_tablet_id',
-                        'value' => function ($data) {
-                            return $data->defaultTabletName;
-                        }
-                    ],
-                    [
                         'attribute' => 'created_at',
                         'value' => function($data) {
                             return $data->createdAt;

@@ -18,15 +18,6 @@ use yii\web\Controller;
 
 class DocumentController extends BaseController
 {
-
-    public function beforeAction($action)
-    {
-        $isTablet = User::isTablet();
-        if($isTablet) {
-            return $this->redirect(User::getTemplateLink());
-        }
-        return parent::beforeAction($action);
-    }
     /**
      * @inheritDoc
      */
@@ -85,7 +76,6 @@ class DocumentController extends BaseController
             //\Yii::$app->infoLog->add('patient', $patient, '__patient-log.txt');
 
             if($appointments and $clinic and $patient) {
-                $model->setAvaliablePatterns();
                 $model->setContent();
                 $model->setFullContent();
                 if($model->checkRequiredFields()) {
@@ -97,9 +87,6 @@ class DocumentController extends BaseController
                         $model->generatePdf(true);
                         $model->cancelDocuments();
                         $btn = '<a href="/pdf/'.$model->document_name.'" class="btn btn-sm btn-primary" target="_blank">Скачать</a>';
-                        if($model->hasCustomParams()) {
-                            $btn .= '<a href="/document/update/?id='.$model->id.'" class="btn btn-sm btn-warning" style="margin-left: 10px;">Заполнить параметры</a>';
-                        }
                         Yii::$app->session->setFlash('success', 'Документ успешно отправлен на планшет '.$btn);
                     }
 
@@ -128,29 +115,6 @@ class DocumentController extends BaseController
         return $this->render('list', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-        ]);
-    }
-
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($this->request->isPost) {
-            $customParams = [];
-            foreach ($this->request->post() as $key => $value) {
-                if (is_numeric($key)) {
-                    $customParams[] = ['id' => $key, 'value' => $value];
-                }
-            }
-            $model->custom_params = $customParams;
-            $model->applyCustomParams();
-            $model->save();
-            Yii::$app->session->setFlash('success', 'Документ успешно сохранен');
-            return $this->redirect(['index']);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
         ]);
     }
 

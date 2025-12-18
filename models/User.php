@@ -7,7 +7,6 @@ use Yii;
 class User extends BaseModel implements \yii\web\IdentityInterface
 {
     public $accessToken;
-    public $role;
 
     private static $users = [
         '100' => [
@@ -58,11 +57,8 @@ class User extends BaseModel implements \yii\web\IdentityInterface
     public function rules()
     {
         return array_merge(parent::rules(), [
-            [['username'], 'required'],
-            [['username'], 'unique'],
-            [['password'], 'required', 'on' => 'create'],
-            [['username', 'password', 'password_hash', 'email', 'role'], 'string', 'max' => 255],
-            [['clinic_id', 'default_tablet_id'], 'safe'],
+            [['username', 'password'], 'required'],
+            [['username', 'password', 'password_hash', 'email'], 'string', 'max' => 255],
             [['status'], 'integer'],
         ]);
     }
@@ -76,11 +72,8 @@ class User extends BaseModel implements \yii\web\IdentityInterface
             'username' => 'Логин',
             'password_hash' => 'Пароль',
             'password' => 'Пароль',
-            'role' => 'Роль',
             'email' => 'E-mail',
             'status' => 'Статус',
-            'clinic_id' => 'Филиал',
-            'default_tablet_id' => 'Планшет по умолчанию',
         ]);
     }
 
@@ -155,21 +148,14 @@ class User extends BaseModel implements \yii\web\IdentityInterface
 
     public function beforeSave($insert)
     {
-        if ($this->password) {
+        if($this->password) {
             $this->password_hash = \Yii::$app->security->generatePasswordHash($this->password);
+            $this->password = '';
         }
-        if (!$this->auth_key) {
+        if(!$this->auth_key) {
             $this->auth_key = Yii::$app->security->generateRandomString();
         }
         return parent::beforeSave($insert);
-    }
-
-    public function afterFind()
-    {
-        $auth = Yii::$app->authManager;
-        $userRoles = $auth->getRolesByUser($this->id);
-        $this->role = $userRoles[array_key_first($userRoles)]->name ?? null;
-        return parent::afterFind();
     }
 
     public function afterSave($insert, $changedAttributes)
@@ -178,94 +164,31 @@ class User extends BaseModel implements \yii\web\IdentityInterface
         if (!$roles) {
             $this->createRole();
         }
-        else {
-            $this->updateRole();
-        }
         return parent::afterSave($insert, $changedAttributes);
     }
 
     public function createRole()
     {
         $auth = Yii::$app->authManager;
-        $roleName = $this->role ?? 'manager';
-        $role = $auth->getRole($roleName);
-        $auth->assign($role, $this->id);
+        $manager = $auth->getRole('manager');
+        $auth->assign($manager, $this->id);
     }
-
-    public function updateRole()
-    {
-        $auth = Yii::$app->authManager;
-        $roleName = $this->role ?? 'manager';
-        $auth->revokeAll($this->id);
-        $role = $auth->getRole($roleName);
-        $auth->assign($role, $this->id);
-    }
-
     public function getRoleName()
     {
         $roles = Yii::$app->authManager->getRolesByUser($this->id);
-        if ($roles) {
-            foreach ($roles as $role) {
+        if($roles) {
+            foreach($roles as $role) {
                 return $role->description;
             }
         }
         return false;
     }
-
-    public function getClinicName()
-    {
-        $clinics = Api::getClinicsList();
-        if ($this->clinic_id and isset($clinics[$this->clinic_id])) {
-            return $clinics[$this->clinic_id];
-        }
-        return false;
-    }
-
-    public function getDefaultTabletName()
-    {
-        $tablet = Tablet::findOne($this->default_tablet_id);
-        return $tablet ? $tablet->name : '';
-    }
-
     public static function isAdmin()
     {
         return Yii::$app->authManager->getAssignment('admin', Yii::$app->user->id);
     }
-
     public static function isManager()
     {
         return Yii::$app->authManager->getAssignment('manager', Yii::$app->user->id);
-    }
-
-    public static function isTablet()
-    {
-        return Yii::$app->authManager->getAssignment('tablet', Yii::$app->user->id);
-    }
-
-    public static function getRoleList()
-    {
-        $roleList = [];
-        if($roles = \Yii::$app->authManager->getRoles()) {
-            foreach($roles as $roleValues) {
-                $roleList[$roleValues->name] = $roleValues->description;
-            }
-        }
-        if(!isset($roleList['tablet'])) {
-            $auth = Yii::$app->authManager;
-            $tablet = $auth->createRole('tablet');
-            $tablet->description = 'Планшет';
-            $auth->add($tablet);
-            return self::getRoleList();
-        }
-        return $roleList;
-    }
-
-    public static function getTemplateLink()
-    {
-        if($user = self::findIdentity(Yii::$app->user->identity->id)) {
-            return '/tablet/' . $user->default_tablet_id;
-        }
-
-        return '/tablet/';
     }
 }

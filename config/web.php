@@ -33,7 +33,6 @@ $config = [
         'user' => [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
-            'authTimeout' => 3600 * 24 * 30
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
@@ -84,9 +83,6 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                'template/<template_id:\d+>/custom-params/create' => 'template-custom-params/create',
-                'template/<template_id:\d+>/custom-params/update' => 'template-custom-params/update',
-                'template/<template_id:\d+>/custom-params/delete' => 'template-custom-params/delete',
                 'tablet/<id:\d+>' => 'tablet/sign'
             ],
         ],

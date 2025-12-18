@@ -17,7 +17,7 @@ use app\models\User;
 
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="document-list">
+<div class="industry-index">
     <div class="card">
         <div class="card-header">
             <h1><?= Html::encode($this->title) ?></h1>
@@ -71,7 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'class' => ActionColumn::className(),
-                        'template' => '{cancel}{update}{delete}',
+                        'template' => '{cancel}{delete}',
                         'buttons' => [
                             'cancel' => function($link, $model) {
                                 return Html::a($model->cancelSvg, ['document/cancel', 'id' => $model->id], ['class' => 'table__action', 'title' => 'Отмена документа', 'data-confirm' => $model->cancelConfirmText]);

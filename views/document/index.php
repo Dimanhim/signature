@@ -23,17 +23,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         <div class="card-body">
                             <?= $form->field($model, 'appointment_id')->textInput(['maxlength' => true]) ?>
                             <div class="patient_container"></div>
-                            <?= $form->field($model, 'template_id')->dropDownList(
-                                Template::getListForCurrentUser(),
-                                ['prompt' => '[Не выбрано]']
-                            ) ?>
-                            <?= $form->field($model, 'tablet_id')->dropDownList(
-                                Tablet::getListForCurrentUser(),
-                                [
-                                    'value' => Tablet::getDefaultForCurrentUser(),
-                                    'prompt' => '[Не выбрано]'
-                                ]
-                            ) ?>
+                            <?= $form->field($model, 'template_id')->dropDownList(Template::getList(), ['prompt' => '[Не выбрано]']) ?>
+                            <?= $form->field($model, 'tablet_id')->dropDownList(Tablet::getList(), ['prompt' => '[Не выбрано]']) ?>
                             <div class="form-group">
                                 <?= Html::submitButton('Создать', ['class' => 'btn btn-success']) ?>
                             </div>
