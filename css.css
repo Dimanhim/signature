@@ -1,0 +1,54 @@
+.body {
+    font-family: Tahoma;
+}
+
+/* Кнопка на первом экране */
+
+.wallpaper__update {
+    border-radius: 100px;
+    padding: 20px 20px 20px 70px;
+    left:inherit;
+}
+
+.wallpaper__update-text {
+    font-size: 40px;
+    color: #000;
+    margin-right: 20px;
+    text-transform: uppercase;
+    font-weight: 400;
+}
+
+.wallpaper__update-button {
+    width: 93px;
+    height: 93px;
+}
+
+/* Остальные экраны */
+
+.doc__head {
+    color: #1D0E5F;
+}
+
+.btn {
+    background: #009445;
+    text-transform: uppercase;
+}
+.btn--white {
+    background: #fff;
+    color: #1D0E5F;
+}
+.modal__btns .btn:first-child {
+    background: #009445;
+}
+.btn--dark,
+.modal__btns .btn:first-child
+{
+    background: #000;
+}
+
+.simplebar-scrollbar::before {
+    background-color: #009445;
+}
+.modal__close span {
+    background: #000;
+}
