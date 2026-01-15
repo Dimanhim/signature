@@ -13,38 +13,36 @@ use yii\grid\GridView;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-index">
-    <div class="card">
-        <div class="card-header">
-            <h1><?= Html::encode($this->title) ?></h1>
-        </div>
-        <div class="card-body">
-            <p>
-                <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
-            </p>
 
-            <?= GridView::widget([
-                'dataProvider' => $dataProvider,
-                'filterModel' => $searchModel,
-                'columns' => [
-                    ['class' => 'yii\grid\SerialColumn'],
+    <h1><?= Html::encode($this->title) ?></h1>
 
-                    'username',
-                    'email:email',
-                    [
-                        'attribute' => 'Роль',
-                        'value' => function($data) {
-                            return $data->roleName;
-                        }
-                    ],
-                    'is_active:boolean',
-                    [
-                        'class' => ActionColumn::className(),
-                        'urlCreator' => function ($action, User $model, $key, $index, $column) {
-                            return Url::toRoute([$action, 'id' => $model->id]);
-                        }
-                    ],
-                ],
-            ]); ?>
-        </div>
-    </div>
+    <p>
+        <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
+    </p>
+
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => [
+            ['class' => 'yii\grid\SerialColumn'],
+
+            'username',
+            'email:email',
+            [
+                'attribute' => 'Роль',
+                'value' => function($data) {
+                    return $data->roleName;
+                }
+            ],
+            'is_active:boolean',
+            [
+                'class' => ActionColumn::className(),
+                'urlCreator' => function ($action, User $model, $key, $index, $column) {
+                    return Url::toRoute([$action, 'id' => $model->id]);
+                 }
+            ],
+        ],
+    ]); ?>
+
+
 </div>

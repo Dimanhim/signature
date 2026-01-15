@@ -32,33 +32,16 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 <?php $this->beginBody() ?>
 
 <header id="header">
-    <div class="header-company">
-        <a href="/" class="logo">
-            <img src="/img/logo.png" alt="Логотип">
-        </a>
-        <div class="header-company-text">
-            <p class="header-company-text-service">Сервис подписи документов</p>
-        </div>
-        <div class="header-company-text">
-            <p class="header-company-text-name"><?= Setting::findOne(['key' => 'app_name'])->value ?></p>
-        </div>
-        <div class="header-company-text header-company-logout">
-            <a href="/site/logout" style="padding: 4px 10px;">
-                <span class="hidden-xs head-user-name fa fa-sign-out" style="font-size: 20px;"></span>
-            </a>
-        </div>
-    </div>
     <?php
     NavBar::begin([
-        'brandLabel' => false,
-        //'brandUrl' => Setting::findOne(['key' => 'app_name'])->value,
+        'brandLabel' => Setting::findOne(['key' => 'app_name'])->value,
+        'brandUrl' => Setting::findOne(['key' => 'app_name'])->value,
         'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
     ]);
-    $items = [
-        ['label' => 'Создать документ', 'url' => ['document/index']],
-        ['label' => 'Планшеты', 'url' => ['tablet/index']],
-    ];
+    $items = [];
+    $items[] = ['label' => 'Создать документ', 'url' => ['document/index']];
     if(User::isAdmin()) {
+        $items[] = ['label' => 'Планшеты', 'url' => ['tablet/index']];
         $items[] = ['label' => 'Шаблоны', 'url' => ['template/index']];
         $items[] = ['label' => 'Пользователи', 'url' => ['user/index']];
         $items[] = ['label' => 'Настройки', 'url' => ['settings/index']];
@@ -67,13 +50,13 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         $items[] = ['label' => 'Вход', 'url' => ['/site/login']];
     }
     else {
-        $items[] = /*'<li class="nav-item">'
+        $items[] = '<li class="nav-item">'
         . Html::beginForm(['/site/logout'])
         . Html::submitButton(
             'Выход (' . Yii::$app->user->identity->username . ')',
             ['class' => 'nav-link btn btn-link logout']
-        )*/
-        Html::endForm()
+        )
+        . Html::endForm()
         . '</li>';
     }
     /*$items = [
@@ -103,7 +86,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 <main id="main" class="flex-shrink-0" role="main">
     <div class="container">
         <?php if (!empty($this->params['breadcrumbs'])): ?>
-            <?= Breadcrumbs::widget(['links' => $this->params['breadcrumbs'], 'homeLink' => ['label' => 'Главная', 'url' => '/']]) ?>
+            <?= Breadcrumbs::widget(['links' => $this->params['breadcrumbs'], 'homeLink' => ['label' => 'Главная', 'url' => 'site/index']]) ?>
         <?php endif ?>
         <p class="info-message"></p>
         <?= Alert::widget() ?>

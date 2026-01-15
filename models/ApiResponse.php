@@ -20,8 +20,8 @@ class ApiResponse
 
     public function getDocuments()
     {
-        $params = Yii::$app->request->post() ?: Yii::$app->request->get() ;
-        $tablet_id = $params['tablet_id'] ?? null;
+        $params = Yii::$app->request->get();
+        $tablet_id = isset($params['tablet_id']) ? $params['tablet_id'] : null;
 
         $data = [];
         if(!$tablet_id) {
@@ -58,7 +58,7 @@ class ApiResponse
         }
     }
 
-    public function setContent($data)
+    public function setSignatures($data)
     {
         // здесь отправляем емейл, если send_email установлен в true
         if(isset($data['document_id'])) {
@@ -70,7 +70,6 @@ class ApiResponse
                 $this->addError('Документ уже подписан');
                 return $this->result;
             }
-            $document->setContentWithCustom($data);
             if(isset($data['signatures'])) {
                 $document->contentWithSignatures($data['signatures']);
                 $document->contentWithPatterns($data);
@@ -78,7 +77,7 @@ class ApiResponse
                 $document->uploadFile();
                 if(!$document->hasDocumentErrors()) {
                     if($document->saveSignatures($data['signatures'])) {
-                        $this->result['message'] = 'Успешно добавлено '.count($data['signatures']).' подписей, документ отправлен';
+                        $this->result['message'] = 'Успешно добавлено '.count($data['signatures']).' подписей, документ сгенерирован';
                     }
                 }
                 else {

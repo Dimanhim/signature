@@ -13,31 +13,29 @@ use himiklab\sortablegrid\SortableGridView;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="industry-index">
-    <div class="card">
-        <div class="card-header">
-            <h1><?= Html::encode($this->title) ?></h1>
-        </div>
-        <div class="card-body">
-            <p>
-                <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
-            </p>
 
-            <?= SortableGridView::widget([
-                'dataProvider' => $dataProvider,
-                'filterModel' => $searchModel,
-                'columns' => [
-                    ['class' => 'yii\grid\SerialColumn'],
+    <h1><?= Html::encode($this->title) ?></h1>
 
-                    'name',
+    <p>
+        <?= Html::a('Добавить', ['create'], ['class' => 'btn btn-success']) ?>
+    </p>
 
-                    [
-                        'class' => ActionColumn::className(),
-                        'urlCreator' => function ($action, Template $model, $key, $index, $column) {
-                            return Url::toRoute([$action, 'id' => $model->id]);
-                        }
-                    ],
-                ],
-            ]); ?>
-        </div>
-    </div>
+    <?= SortableGridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => [
+            ['class' => 'yii\grid\SerialColumn'],
+
+            'name',
+
+            [
+                'class' => ActionColumn::className(),
+                'urlCreator' => function ($action, Template $model, $key, $index, $column) {
+                    return Url::toRoute([$action, 'id' => $model->id]);
+                 }
+            ],
+        ],
+    ]); ?>
+
+
 </div>

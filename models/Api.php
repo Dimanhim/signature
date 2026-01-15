@@ -3,6 +3,7 @@
 namespace app\models;
 
 use yii\base\Model;
+use app\models\Setting;
 
 class Api extends Model
 {
@@ -30,37 +31,36 @@ class Api extends Model
         $this->api_key = Setting::findOne(['key' => 'rnova_api_key'])->value;
         $this->setSessionId();
         date_default_timezone_set('Europe/Moscow');
-        $this->time_start = date('d.m.Y') . ' 00:00';
-        $this->time_end = date('d.m.Y') . ' 23:59';
+        $this->time_start = date('d.m.Y').' 00:00';
+        $this->time_end = date('d.m.Y').' 23:59';
         $this->time_now = date('d.m.Y H:i');
     }
 
     protected function setSessionId()
     {
         $session = \Yii::$app->session;
-        if (!$session->has('session_id')) {
-            $session_id = mt_rand(100000, 1000000);
+        if(!$session->has('session_id')) {
+            $session_id = mt_rand(100000,1000000);
             $session->set('session_id', $session_id);
         }
         $this->_session_id = $session->get('session_id');
     }
 
 
+
+
     public function getTimeStart()
     {
         return $this->time_start;
     }
-
     public function getTimeEnd()
     {
         return $this->time_end;
     }
-
     public function getTimeNow()
     {
         return $this->time_now;
     }
-
     public function getDate()
     {
         return date('d.m.Y', strtotime($this->time_start));
@@ -91,10 +91,27 @@ class Api extends Model
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     private function getFullUrl($method, $params)
     {
         // Rnova
         $url = $this->request_url . $method;
+
 
 
         //$url = $this->request_url . '?method='.$method;
@@ -104,25 +121,6 @@ class Api extends Model
             }
         }*/
         return $url;
-    }
-
-    public static function getClinicsList()
-    {
-        $data = [];
-        $api = new Api();
-        $clinicsJson = $api->getClinics();
-        //\Yii::$app->infoLog->add('$clinicsJson', $clinicsJson);
-        if ($clinicsJson and ($clinics = json_decode(
-                $clinicsJson,
-                true
-            )) and isset($clinics['data']) and $clinics['data']) {
-            foreach ($clinics['data'] as $clinic) {
-                if (isset($clinic['id']) and isset($clinic['title'])) {
-                    $data[$clinic['id']] = $clinic['title'];
-                }
-            }
-        }
-        return $data;
     }
 
     private function request($method = 'getAppointments', $params = [])
@@ -160,12 +158,15 @@ class Api extends Model
 
         $info = curl_getinfo($curl);
 
-        if ($info['http_code'] != 200) {
+        if($info['http_code'] != 200) {
             //file_put_contents('curl-logs.txt', date('d.m.Y H:i:s').' - '.print_r($info, true)."\n", FILE_APPEND);
         }
         curl_close($curl);
         return $response;
     }
+
+
+
 
 
 }

@@ -3,7 +3,6 @@
 namespace app\models;
 
 use Yii;
-use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "_settings".
@@ -16,7 +15,7 @@ use yii\db\ActiveRecord;
  * @property int|null $created_at
  * @property int|null $updated_at
  */
-class Setting extends ActiveRecord
+class Setting extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -55,21 +54,5 @@ class Setting extends ActiveRecord
             'created_at' => 'Создано',
             'updated_at' => 'Изменено',
         ];
-    }
-
-    public static function getValueByName($valueName = null)
-    {
-        if($model = Setting::findOne(['key' => $valueName])) {
-            return $model->value;
-        }
-        return null;
-    }
-
-    public static function getImages()
-    {
-        $values = self::getValueByName('images');
-        if($values) return json_decode($values, true);
-
-        return null;
     }
 }

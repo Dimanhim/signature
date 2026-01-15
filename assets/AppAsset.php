@@ -45,14 +45,12 @@ class AppAsset extends AssetBundle
     public static function getCss()
     {
         return [
-            'css/awesome/line-awesome-font-awesome.min.css',
             'css/bootstrap-icons.css',
             'css/jquery.fancybox.min.css',
             'css/select2.min.css',
             'css/chosen.css',
             'css/jquery-ui.min.css',
             'css/site.css?v='.mt_rand(1000,10000),
-            'css/app.css?v='.mt_rand(1000,10000),
         ];
     }
 

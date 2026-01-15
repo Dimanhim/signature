@@ -11,37 +11,24 @@ $this->params['breadcrumbs'][] = ['label' => $model->modelName, 'url' => ['list'
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="document-index">
-    <div class="card">
-        <div class="card-header">
-            <h1><?= Html::encode($this->title) ?></h1>
-        </div>
-        <div class="card-body">
-            <?php $form = ActiveForm::begin(); ?>
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-body">
-                            <?= $form->field($model, 'appointment_id')->textInput(['maxlength' => true]) ?>
-                            <div class="patient_container"></div>
-                            <?= $form->field($model, 'template_id')->dropDownList(
-                                Template::getListForCurrentUser(),
-                                ['prompt' => '[Не выбрано]']
-                            ) ?>
-                            <?= $form->field($model, 'tablet_id')->dropDownList(
-                                Tablet::getListForCurrentUser(),
-                                [
-                                    'value' => Tablet::getDefaultForCurrentUser(),
-                                    'prompt' => '[Не выбрано]'
-                                ]
-                            ) ?>
-                            <div class="form-group">
-                                <?= Html::submitButton('Создать', ['class' => 'btn btn-success']) ?>
-                            </div>
-                        </div>
+
+    <h1><?= Html::encode($this->title) ?></h1>
+
+    <?php $form = ActiveForm::begin(); ?>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <?= $form->field($model, 'appointment_id')->textInput(['maxlength' => true]) ?>
+                    <div class="patient_container"></div>
+                    <?= $form->field($model, 'template_id')->dropDownList(Template::getList(), ['prompt' => '[Не выбрано]']) ?>
+                    <?= $form->field($model, 'tablet_id')->dropDownList(Tablet::getList(), ['prompt' => '[Не выбрано]']) ?>
+                    <div class="form-group">
+                        <?= Html::submitButton('Создать', ['class' => 'btn btn-success']) ?>
                     </div>
                 </div>
             </div>
-            <?php ActiveForm::end(); ?>
         </div>
     </div>
+    <?php ActiveForm::end(); ?>
 </div>

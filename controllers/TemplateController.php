@@ -3,7 +3,6 @@
 namespace app\controllers;
 
 use app\models\Template;
-use app\models\TemplateCustomParams;
 use app\models\TemplateSearch;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -106,7 +105,6 @@ class TemplateController extends BaseController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $custom = TemplateCustomParams::searchByTemplate($id);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save() && $model->saveParams()) {
             return $this->redirect(['index']);
@@ -114,7 +112,6 @@ class TemplateController extends BaseController
 
         return $this->render('update', [
             'model' => $model,
-            'custom' => $custom,
         ]);
     }
 }

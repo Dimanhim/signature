@@ -84,12 +84,7 @@ class BaseModel extends ActiveRecord
      */
     public static function findModels()
     {
-        return self::className()::find()->where(['is_active' => 1])->orderBy(['position' => 'SORT ASC']);
-    }
-
-    public static function findDesc()
-    {
-        return self::className()::find()->where(['is_active' => 1])->orderBy(['id' => SORT_DESC]);
+        return self::className()::find()->andWhere(['is_active' => 1])->orderBy(['position' => 'SORT ASC']);
     }
 
     /**
@@ -183,7 +178,7 @@ class BaseModel extends ActiveRecord
     private function handleImages() {
 
         $prefix = Yii::$app->db->tablePrefix;
-        $dirName = str_replace([$prefix, '{', '}', '%'], '', self::className()::tableName());
+        $dirName = str_replace($prefix, '', self::className()::tableName());
         $filesDir = Yii::getAlias('@upload')."/{$dirName}/";
         if (!file_exists($filesDir)) mkdir($filesDir, 0777, true);
 

@@ -1,7 +1,6 @@
 <?php
 
 use app\models\Template;
-use yii\helpers\Html;
 
 $params = Template::getParamsArray();
 
@@ -21,7 +20,7 @@ $params = Template::getParamsArray();
                     <?php foreach($paramItems as $paramItemId => $paramItemName) : ?>
                         <tr>
                             <td><?= $paramItemName ?></td>
-                            <td><?= $form->field($model, "params[{$paramItemId}][required]")->checkbox(['label' => Html::tag('span',''), 'labelOptions' => ['class' => 'ui-checkbox']]) ?></td>
+                            <td><?= $form->field($model, "params[{$paramItemId}][required]")->checkbox(['label' => '']) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>

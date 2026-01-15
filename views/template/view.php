@@ -13,48 +13,44 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="industry-view">
 
-    <div class="card">
-        <div class="card-header">
-            <h1><?= Html::encode($this->title) ?></h1>
-        </div>
-        <div class="card-body">
-            <p>
-                <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-                <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
-                    'class' => 'btn btn-danger',
-                    'data' => [
-                        'confirm' => 'Вы уверены, что хотите удалить?',
-                        'method' => 'post',
-                    ],
-                ]) ?>
-            </p>
+    <h1><?= Html::encode($this->title) ?></h1>
 
-            <?= DetailView::widget([
-                'model' => $model,
-                'attributes' => [
-                    'id',
-                    'name',
+    <p>
+        <?= Html::a('Редактировать', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Удалить', ['delete', 'id' => $model->id], [
+            'class' => 'btn btn-danger',
+            'data' => [
+                'confirm' => 'Вы уверены, что хотите удалить?',
+                'method' => 'post',
+            ],
+        ]) ?>
+    </p>
 
-                    [
-                        'attribute' => 'is_active',
-                        'value' => function($data) {
-                            return $data->active;
-                        }
-                    ],
-                    [
-                        'attribute' => 'created_at',
-                        'value' => function($data) {
-                            return $data->createdAt;
-                        }
-                    ],
-                    [
-                        'attribute' => 'updated_at',
-                        'value' => function($data) {
-                            return $data->updatedAt;
-                        }
-                    ],
-                ],
-            ]) ?>
-        </div>
-    </div>
+    <?= DetailView::widget([
+        'model' => $model,
+        'attributes' => [
+            'id',
+            'name',
+
+            [
+                'attribute' => 'is_active',
+                'value' => function($data) {
+                    return $data->active;
+                }
+            ],
+            [
+                'attribute' => 'created_at',
+                'value' => function($data) {
+                    return $data->createdAt;
+                }
+            ],
+            [
+                'attribute' => 'updated_at',
+                'value' => function($data) {
+                    return $data->updatedAt;
+                }
+            ],
+        ],
+    ]) ?>
+
 </div>

@@ -26,8 +26,17 @@ class TabletController extends BaseController
                 'verbs' => [
                     'class' => VerbFilter::className(),
                     'actions' => [
-                        //'delete' => ['POST'],
+                        'delete' => ['POST'],
                     ],
+                ],
+                'access' => [
+                    'class' => AccessControl::className(),
+                    'rules' => [
+                        [
+                            'allow' => true,
+                            'roles' => ['admin'],
+                        ],
+                    ]
                 ],
             ]
         );
@@ -101,21 +110,6 @@ class TabletController extends BaseController
 
         return $this->render('update', [
             'model' => $model,
-        ]);
-    }
-
-    /**
-     * @param $id
-     * @return string
-     * @throws NotFoundHttpException
-     */
-    public function actionSign($id)
-    {
-        $this->layout = 'sign';
-        $model = $this->findModel($id);
-
-        return $this->render('sign', [
-            'model' => $model
         ]);
     }
 }
