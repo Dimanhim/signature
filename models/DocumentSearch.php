@@ -39,12 +39,13 @@ class DocumentSearch extends Document
      */
     public function search($params, $tablet_id)
     {
-        $query = Document::findModels();
+        $query = Document::find()->where(['is_active' => 1]);
 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]],
         ]);
 
         $this->load($params);

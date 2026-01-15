@@ -69,6 +69,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'visible' => User::isAdmin(),
             ],
             [
+                'attribute' => 'created_at',
+                'value' => function($data) {
+                    return date('d.m.Y H:i', $data->created_at);
+                }
+            ],
+            [
                 'class' => ActionColumn::className(),
                 'template' => '{cancel}{delete}',
                 'buttons' => [
