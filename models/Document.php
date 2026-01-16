@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\components\ApiHelper;
+use app\components\Helpers;
 use kartik\mpdf\Pdf;
 use Yii;
 use yii\base\Model;
@@ -331,6 +332,53 @@ class Document extends BaseModel
         return $str;
     }
 
+    public function getServicesListDayFromData($items)
+    {
+        $str = '';
+        $count = 1;
+        $totalQty = 0;
+        $totalPrice = 0;
+        if(isset($items['services']) and $items['services']) {
+            $str .= '<table class="table-services-list">';
+            $str .=   '<tr>';
+            $str .=     "<th></th>";
+            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>Услуга</font></font></th>";
+            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>Стоимость</font></font></th>";
+            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>Кол-во</font></font></th>";
+            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>Скидка</font></font></th>";
+            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>Сумма</font></font></th>";
+            $str .=   '</tr>';
+
+            foreach($items['services'] as $itemService) {
+                if(!Helpers::isTimeToday($items['time_start'])) continue;
+
+                $totalQty += $itemService['count'];
+                $totalPrice += $itemService['value'];
+
+                $str .=   '<tr>';
+                $str .=     "<td><font face='Carlito, sans-serif'><font style='font-size: 11px;'>{$count}</font></font></td>";
+                $str .=     "<td><font face='Carlito, sans-serif'><font style='font-size: 11px;'>{$itemService['title']}</font></font></td>";
+                $str .=     "<td><font face='Carlito, sans-serif'><font style='font-size: 11px;'>".number_format($itemService['price'], 2, ',', ' ') ." руб.</font></font></td>";
+                $str .=     "<td><font face='Carlito, sans-serif'><font style='font-size: 11px;'>{$itemService['count']}</font></font></td>";
+                $str .=     "<td><font face='Carlito, sans-serif'><font style='font-size: 11px;'>{$itemService['discount']}%</font></font></td>";
+                $str .=     "<td><font face='Carlito, sans-serif'><font style='font-size: 11px;'>".number_format($itemService['value'], 2, ',', ' ') ." руб.</font></font></td>";
+                $str .=   '</tr>';
+                $count++;
+            }
+
+            $str .=   '<tr>';
+            $str .=     "<th style='border: none;'></th>";
+            $str .=     "<th style='border: none;'></th>";
+            $str .=     "<th style='border: none;'></th>";
+            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>{$totalQty}</font></font></th>";
+            $str .=     "<th></th>";
+            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>".number_format($totalPrice, 2, ',', ' ') ." руб.</font></font></th>";
+            $str .=   '</tr>';
+            $str .= '</table>';
+        }
+        return $str;
+    }
+
     public function getPriceFullFromData($items)
     {
         $servicePrice = 0;
@@ -428,6 +476,7 @@ class Document extends BaseModel
                     $result['time_from'] = isset($result['time_start']) ? date('H:i', strtotime($result['time_start']))  : '';
                     $result['services_no_price'] = $this->getServicesNoPriceFromData($result);
                     $result['service_list'] = $this->getServicesListFromData($result);
+                    $result['service_list_day'] = $this->getServicesListDayFromData($result);
                     $result['price_full'] = $this->getPriceFullFromData($result);
                     $result['user_name_short'] = $result['author_name'];
                 }
