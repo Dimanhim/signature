@@ -965,8 +965,75 @@ class Document extends BaseModel
 
     public function cancelDocuments()
     {
+        $this->clearDocuments();
         if(!Setting::findOne(['key' => 'cancel_unsigned'])->value) return false;
         Document::updateAll(['canceled' => 1], ['and', ['!=', 'id', $this->id], ['=', 'tablet_id',  $this->tablet_id]]);
+    }
+
+    public function clearDocuments()
+    {
+        $lifetimeDays = Yii::$app->settings->getParam('lifetime_days');
+        if(!$lifetimeDays) return false;
+
+        $timeForDelete = strtotime('now') - $lifetimeDays * 60 * 60 * 24;
+
+        $sql = "
+            DELETE FROM " . Yii::$app->db->tablePrefix . "documents WHERE created_at < {$timeForDelete};
+            DELETE FROM " . Yii::$app->db->tablePrefix . "document_signatures WHERE created_at < {$timeForDelete}";
+        try {
+            Yii::$app->db->createCommand($sql)->execute();
+        }
+        catch (\Exception $e) {
+            \Yii::$app->infoLog->add('sql delete error', $sql, '_delete-documents-error.txt');
+            \Yii::$app->infoLog->add('sql delete error exception', $e, '_delete-documents-error.txt');
+            return false;
+        }
+
+        $this->unlinkDocuments();
+    }
+
+    private function unlinkDocuments()
+    {
+        $pdfDir = \Yii::getAlias('@app/web').'/pdf/';
+
+        $lifetimeDays = Yii::$app->settings->getParam('lifetime_days');
+        if(!$lifetimeDays) return false;
+
+        $files = scandir($pdfDir);
+
+        if($files) {
+            $nowTime = strtotime('now');
+
+            foreach($files as $file) {
+                if($file === '.' or $file === '..') continue;
+
+                $fileLifeTime = filemtime($pdfDir.$file);
+
+                if($fileLifeTime <= $nowTime - $lifetimeDays * 60 * 60 * 24) {
+                    $this->unlinkDocument($file);
+                }
+            }
+        }
+    }
+
+    public function unlinkDocument($fileName = null)
+    {
+        if(!$fileName) return false;
+
+        $pdfDir = \Yii::getAlias('@app/web').'/pdf/';
+        $filePath = $pdfDir.$fileName;
+
+        try {
+            if(file_exists($filePath)) {
+                \Yii::$app->infoLog->add('filePath', $filePath, '_unlink-files.txt');
+                unlink($pdfDir.$fileName);
+            }
+        }
+        catch(\Exception $e) {
+            \Yii::$app->infoLog->add('unlink error', $fileName, '_delete-documents-error.txt');
+            \Yii::$app->infoLog->add('exception', $e, '_delete-documents-error.txt');
+            return false;
+        }
     }
 
     public function sendDocEmail($data)

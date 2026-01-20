@@ -27,6 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?= $form->field($model, 'tablet_css')->textarea()->label('CSS-стили планшета') ?>
                         <?= $form->field($model, 'cancel_unsigned')->checkbox(['label' => Html::tag('span','Отменять неподписанные документы'), 'labelOptions' => ['class' => 'ui-checkbox']]) ?>
                         <?= $form->field($model, 'update_on_demand')->checkbox(['label' => Html::tag('span','Обновлять планшеты вручную'), 'labelOptions' => ['class' => 'ui-checkbox']]) ?>
+                        <?= $form->field($model, 'lifetime_days')->textInput()->label('Удалять документы через, дн.') ?>
                         <div class="form-group">
                             <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
                         </div>
