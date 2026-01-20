@@ -79,7 +79,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{cancel}{delete}',
                 'buttons' => [
                     'cancel' => function($link, $model) {
-                        return Html::a($model->cancelSvg, ['document/cancel', 'id' => $model->id], ['class' => 'table__action', 'title' => 'Отмена документа', 'data-confirm' => $model->cancelConfirmText]);
+                        return Html::a($model->cancelSvg, ['document/cancel', 'id' => $model->id], ['class' => 'table__action', 'title' => $model->cancelTitle, 'data-confirm' => $model->cancelConfirmText]);
                     }
                 ],
                 'urlCreator' => function ($action, Document $model, $key, $index, $column) {

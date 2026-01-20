@@ -33,7 +33,15 @@ class ApiResponse
             return $this->result;
         }
 
-        if($documents = Document::findModels()->andWhere(['tablet_id' => $tablet->id])->andWhere(['canceled' => 0])->andWhere(['is_signature' => NULL])->all()) {
+        $documents = Document::find()
+            ->with(['signatures'])
+            ->where(['is_active' => 1])
+            ->andWhere(['tablet_id' => $tablet->id])
+            ->andWhere(['canceled' => 0])
+            ->andWhere(['is_signature' => NULL])
+            ->all();
+
+        if($documents) {
             foreach($documents as $document) {
                 if(!$document->signatures) {
                     $data[] = $document->contentResponse();

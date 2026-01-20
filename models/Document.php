@@ -817,6 +817,11 @@ class Document extends BaseModel
         return !$this->canceled ? $svgUnCancel : $svgCancel;
     }
 
+cancel    public function getCancelTitle()
+    {
+        return $this->canceled ? 'Вернуть документ' : 'Отменить документ';
+    }
+
     public function getCancelConfirmText()
     {
         return $this->canceled ? 'Вы уверены, что хотите вернуть документ?' : 'Вы уверены, что хотите отменить документ?';
