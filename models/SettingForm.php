@@ -79,7 +79,7 @@ class SettingForm extends Model
 
     public function handleImages()
     {
-        $data = json_decode($this->images, true);
+        $data = $this->images ? json_decode($this->images, true) : [];
 
         if($this->image_fields) {
             foreach($this->image_fields as $imageName => $image) {
