@@ -29,31 +29,6 @@ class m130524_201442_init extends Migration
             'created_at'            => Schema::TYPE_INTEGER . ' NOT NULL',
             'updated_at'            => Schema::TYPE_INTEGER . ' NOT NULL',
         ], $tableOptions);
-
-        $this->insert('{{%user}}', [
-            'username' => 'admin',
-            'auth_key' => '',
-            'password' => '123456',
-            'password_hash' => '$2y$13$1W.D51rRnv9Hpbo/SxSZmeNMsZppWpnYMQeAJ9C/BzDxHYE6qMN8C',
-            'password_reset_token' => null,
-            'email' => 'dimanhim@list.ru',
-            'status' => '10',
-            'is_active' => 1,
-            'created_at' => time(),
-            'updated_at' => time()
-        ]);
-
-        $this->batchInsert('{{%auth_item}}',
-        ['name', 'type', 'description'],
-        [
-            ['admin', '1', 'Администратор'],
-            ['manager', '1', 'Менеджер'],
-        ]);
-        
-        $this->insert('{{%auth_assignment}}', [
-            'item_name' => 'admin',
-            'user_id' => 1,
-        ]);
     }
 
     public function down()

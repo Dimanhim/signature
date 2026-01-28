@@ -100,9 +100,7 @@ class DocumentController extends BaseController
                         if($model->hasCustomParams()) {
                             $btn .= '<a href="/document/update/?id='.$model->id.'" class="btn btn-sm btn-warning" style="margin-left: 10px;">Заполнить параметры</a>';
                         }
-                        if(!\Yii::$app->session->hasFlash('error')) {
-                            Yii::$app->session->setFlash('success', 'Документ успешно отправлен на планшет '.$btn);
-                        }
+                        Yii::$app->session->setFlash('success', 'Документ успешно отправлен на планшет '.$btn);
                     }
 
                     // раскомментировать для отладки генерации документа

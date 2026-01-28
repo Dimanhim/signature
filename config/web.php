@@ -7,13 +7,13 @@ $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
-    'name' => 'Сервис Подписи',
+    'name' => 'Alfa',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'language' => 'ru-RU',
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
+        '@npm' => '@vendor/npm-asset',
         '@upload' => '@app/web/upload',
         '@tablet' => '@app/web/sign/img',
         '@pdf' => '@app/web/pdf',
@@ -49,7 +49,7 @@ $config = [
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning', 'profile'],
+                    'levels' => ['error', 'warning'],
                 ],
             ],
         ],
@@ -58,19 +58,6 @@ $config = [
             'format' => Pdf::FORMAT_A4,
             'orientation' => Pdf::ORIENT_PORTRAIT,
             'destination' => Pdf::DEST_FILE,
-            // Set font here
-            'options' => [
-                'fontDir' => __DIR__ . '/../web/fonts/',
-                'fontdata' => [
-                    'nimbusroman' => [
-                        'R' => 'NimbusRomNo9LRegular.ttf',
-                        'B' => 'NimbusRomNo9LBold.ttf',
-                        'I' => 'NimbusRomNo9LRegularItalic.ttf',
-                        'BI' => 'NimbusRomNo9LBoldItalic.ttf',
-                    ]
-                ],
-                'default_font' => 'nimbusroman',
-            ],
             // refer settings section for all configuration options
         ],
         'infoLog' => [
@@ -78,9 +65,6 @@ $config = [
         ],
         'api' => [
             'class' => 'app\components\ApiComponent',
-        ],
-        'settings' => [
-            'class' => 'app\components\SettingsComponent',
         ],
         'db' => $db,
         'urlManager' => [

@@ -117,6 +117,12 @@ class ApiController extends Controller
         return $this->responseValue();
     }
 
+    public function actionCancelDocument()
+    {
+        $this->api->cancelDocument();
+        return $this->responseValue();
+    }
+
 
 
 

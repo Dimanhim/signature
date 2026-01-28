@@ -13,9 +13,9 @@ class Helpers
      */
     public static function phoneFormat($phone)
     {
-        if($phone) {
+        if ($phone) {
             $sym = ['-', '(', ')', '_', ' '];
-            $replaced = ['','','','',''];
+            $replaced = ['', '', '', '', ''];
             return str_replace($sym, $replaced, $phone);
         }
         return '';
@@ -26,7 +26,7 @@ class Helpers
     {
         $phone = self::phoneFormat($phone);
         $phoneBody = substr($phone, -10);
-        return '+7'.$phoneBody;
+        return '+7' . $phoneBody;
     }
 
     public static function getSecondsInTime($time)
@@ -37,27 +37,16 @@ class Helpers
         $seconds += $arr[1] * 60;
         return $seconds;
     }
+
     public static function getTimeAsString($time)
     {
-        if($time) {
+        if ($time) {
             $hours = floor($time / 60 / 60);
             $diff = $time - $hours * 60 * 60;
             $minutes = floor($diff / 60);
-            return str_pad($hours, 2, 0, STR_PAD_LEFT).':'.str_pad($minutes, 2, 0, STR_PAD_LEFT);
+            return str_pad($hours, 2, 0, STR_PAD_LEFT) . ':' . str_pad($minutes, 2, 0, STR_PAD_LEFT);
         }
         return 0;
-    }
-
-    public static function isTimeToday($timeStart)
-    {
-        if(is_string($timeStart)) {
-            $timeStart = strtotime($timeStart);
-        }
-
-        $start = strtotime(date('d.m.Y', $timeStart));
-        $today = strtotime(date('d.m.Y'));
-
-        return $start == $today;
     }
 
     public static function getFileInputOptions()
@@ -74,5 +63,19 @@ class Helpers
                 //'showRemove' => false,
             ]
         ];
+    }
+
+    public static function getRandomString(
+        int $length = 10,
+        string $chars = '0123456789abcdefghijklmnopqrstuvwxyz'
+    ): string {
+        $parts = [];
+        
+        $max = mb_strlen($chars, '8bit') - 1;
+        for ($i = 0; $i < $length; ++$i) {
+            $parts[] = $chars[random_int(0, $max)];
+        }
+
+        return implode('', $parts);
     }
 }

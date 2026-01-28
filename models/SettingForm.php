@@ -16,7 +16,6 @@ class SettingForm extends Model
     public $document_css;
     public $tablet_css;
     public $images;
-    public $lifetime_days;
 
     public $image_fields;
 
@@ -33,7 +32,7 @@ class SettingForm extends Model
     {
         return [
             [['app_name', 'rnova_api_url', 'rnova_api_key', 'tablet_url'], 'required'],
-            [['app_name', 'rnova_api_url', 'rnova_api_key', 'tablet_url', 'document_css', 'tablet_css', 'lifetime_days'], 'string'],
+            [['app_name', 'rnova_api_url', 'rnova_api_key', 'tablet_url', 'document_css', 'tablet_css'], 'string'],
             [['images', 'image_fields'], 'safe'],
             [['cancel_unsigned', 'update_on_demand'], 'boolean'],
         ];
@@ -62,7 +61,6 @@ class SettingForm extends Model
             'document_css' => $this->document_css,
             'tablet_css' => $this->tablet_css,
             'images' => $this->images,
-            'lifetime_days' => $this->lifetime_days,
         ];
 
         foreach ($settings as $key => $value) {

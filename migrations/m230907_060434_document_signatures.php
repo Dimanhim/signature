@@ -18,7 +18,7 @@ class m230907_060434_document_signatures extends Migration
 
             'document_id'           => Schema::TYPE_INTEGER . ' NOT NULL',
             'signature_id'          => Schema::TYPE_STRING . ' NOT NULL',
-            'signature_path'        => 'longtext',
+            'signature_path'        => Schema::TYPE_TEXT,
 
             'is_active'             => Schema::TYPE_SMALLINT . ' DEFAULT 1',
             'position'              => Schema::TYPE_INTEGER,

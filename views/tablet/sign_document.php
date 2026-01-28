@@ -3,7 +3,7 @@
         <header class="header">
             <div class="container">
                 <div class="header__wrap">
-                    <div class="header__logo"><img src="/sign/img/logo.svg" alt=""></div>
+                    <div class="header__logo"><img :src="logoPath" alt=""></div>
                     <p> Планшет №<b x-html="tabletId"></b></p></div>
             </div>
         </header>
@@ -22,7 +22,11 @@
                         </button>
                     </template>
                     <template x-if="isPartedSigned">
-                        <button class="btn" type="button" disabled="disabled" x-html="signaturesText"></button>
+                        <div>
+                            <button class="btn" type="button" disabled="disabled" x-html="signaturesText"></button>
+                            <button class="btn btn__cancel" type="button" @click="cancelDocument">Отмена</button>
+                        </div>
+
                     </template>
 
                 </div>

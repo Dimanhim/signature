@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\components\ApiHelper;
-use app\components\Helpers;
 use kartik\mpdf\Pdf;
 use Yii;
 use yii\base\Model;
@@ -332,53 +331,6 @@ class Document extends BaseModel
         return $str;
     }
 
-    public function getServicesListDayFromData($items)
-    {
-        $str = '';
-        $count = 1;
-        $totalQty = 0;
-        $totalPrice = 0;
-        if(isset($items['services']) and $items['services']) {
-            $str .= '<table class="table-services-list">';
-            $str .=   '<tr>';
-            $str .=     "<th></th>";
-            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>Услуга</font></font></th>";
-            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>Стоимость</font></font></th>";
-            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>Кол-во</font></font></th>";
-            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>Скидка</font></font></th>";
-            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>Сумма</font></font></th>";
-            $str .=   '</tr>';
-
-            foreach($items['services'] as $itemService) {
-                if(!Helpers::isTimeToday($items['time_start'])) continue;
-
-                $totalQty += $itemService['count'];
-                $totalPrice += $itemService['value'];
-
-                $str .=   '<tr>';
-                $str .=     "<td><font face='Carlito, sans-serif'><font style='font-size: 11px;'>{$count}</font></font></td>";
-                $str .=     "<td><font face='Carlito, sans-serif'><font style='font-size: 11px;'>{$itemService['title']}</font></font></td>";
-                $str .=     "<td><font face='Carlito, sans-serif'><font style='font-size: 11px;'>".number_format($itemService['price'], 2, ',', ' ') ." руб.</font></font></td>";
-                $str .=     "<td><font face='Carlito, sans-serif'><font style='font-size: 11px;'>{$itemService['count']}</font></font></td>";
-                $str .=     "<td><font face='Carlito, sans-serif'><font style='font-size: 11px;'>{$itemService['discount']}%</font></font></td>";
-                $str .=     "<td><font face='Carlito, sans-serif'><font style='font-size: 11px;'>".number_format($itemService['value'], 2, ',', ' ') ." руб.</font></font></td>";
-                $str .=   '</tr>';
-                $count++;
-            }
-
-            $str .=   '<tr>';
-            $str .=     "<th style='border: none;'></th>";
-            $str .=     "<th style='border: none;'></th>";
-            $str .=     "<th style='border: none;'></th>";
-            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>{$totalQty}</font></font></th>";
-            $str .=     "<th></th>";
-            $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>".number_format($totalPrice, 2, ',', ' ') ." руб.</font></font></th>";
-            $str .=   '</tr>';
-            $str .= '</table>';
-        }
-        return $str;
-    }
-
     public function getPriceFullFromData($items)
     {
         $servicePrice = 0;
@@ -476,7 +428,6 @@ class Document extends BaseModel
                     $result['time_from'] = isset($result['time_start']) ? date('H:i', strtotime($result['time_start']))  : '';
                     $result['services_no_price'] = $this->getServicesNoPriceFromData($result);
                     $result['service_list'] = $this->getServicesListFromData($result);
-                    $result['service_list_day'] = $this->getServicesListDayFromData($result);
                     $result['price_full'] = $this->getPriceFullFromData($result);
                     $result['user_name_short'] = $result['author_name'];
                 }
@@ -666,11 +617,6 @@ class Document extends BaseModel
         return $this->generatePdf($content);
     }
 
-    public function getPreparedContent()
-    {
-        return $this->content;
-    }
-
     public function generatePdf($empty = false)
     {
         $pdfDir = \Yii::getAlias('@app/web').'/pdf/';
@@ -681,7 +627,7 @@ class Document extends BaseModel
         //$cssFileName = \Yii::getAlias('@app/web').'/css/pdf.css';
         $cssFileName = \Yii::getAlias('@app/web').'/css/pdf-styles.css';
         $pdf = \Yii::$app->pdf;
-        $pdf->content = $this->getPreparedContent();
+        $pdf->content = $this->content;
         $pdf->destination = Pdf::DEST_FILE;
         $pdf->cssFile = $cssFileName;
         $pdf->cssInline = Setting::findOne(['key' => 'document_css'])->value ?? '';
@@ -691,14 +637,7 @@ class Document extends BaseModel
         $pdf->filename = 'pdf/'.$documentName;
         $this->document_name = $documentName;
         $this->save();
-        try {
-            $pdf->render();
-            return true;
-        }
-        catch(\Exception $e) {
-            \Yii::$app->session->setFlash('error', "Не удалось создать документ");
-            return false;
-        }
+        return $pdf->render();
     }
 
     public function uploadFile()
@@ -977,75 +916,15 @@ class Document extends BaseModel
 
     public function cancelDocuments()
     {
-        $this->clearDocuments();
         if(!Setting::findOne(['key' => 'cancel_unsigned'])->value) return false;
         Document::updateAll(['canceled' => 1], ['and', ['!=', 'id', $this->id], ['=', 'tablet_id',  $this->tablet_id]]);
     }
 
-    public function clearDocuments()
+    public function cancelDocument()
     {
-        $lifetimeDays = Yii::$app->settings->getParam('lifetime_days');
-        if(!$lifetimeDays) return false;
-
-        $timeForDelete = strtotime('now') - $lifetimeDays * 60 * 60 * 24;
-
-        $sql = "
-            DELETE FROM " . Yii::$app->db->tablePrefix . "documents WHERE created_at < {$timeForDelete};
-            DELETE FROM " . Yii::$app->db->tablePrefix . "document_signatures WHERE created_at < {$timeForDelete}";
-        try {
-            Yii::$app->db->createCommand($sql)->execute();
-        }
-        catch (\Exception $e) {
-            \Yii::$app->infoLog->add('sql delete error', $sql, '_delete-documents-error.txt');
-            \Yii::$app->infoLog->add('sql delete error exception', $e, '_delete-documents-error.txt');
-            return false;
-        }
-
-        $this->unlinkDocuments();
-    }
-
-    private function unlinkDocuments()
-    {
-        $pdfDir = \Yii::getAlias('@app/web').'/pdf/';
-
-        $lifetimeDays = Yii::$app->settings->getParam('lifetime_days');
-        if(!$lifetimeDays) return false;
-
-        $files = scandir($pdfDir);
-
-        if($files) {
-            $nowTime = strtotime('now');
-
-            foreach($files as $file) {
-                if($file === '.' or $file === '..') continue;
-
-                $fileLifeTime = filemtime($pdfDir.$file);
-
-                if($fileLifeTime <= $nowTime - $lifetimeDays * 60 * 60 * 24) {
-                    $this->unlinkDocument($file);
-                }
-            }
-        }
-    }
-
-    public function unlinkDocument($fileName = null)
-    {
-        if(!$fileName) return false;
-
-        $pdfDir = \Yii::getAlias('@app/web').'/pdf/';
-        $filePath = $pdfDir.$fileName;
-
-        try {
-            if(file_exists($filePath)) {
-                \Yii::$app->infoLog->add('filePath', $filePath, '_unlink-files.txt');
-                unlink($pdfDir.$fileName);
-            }
-        }
-        catch(\Exception $e) {
-            \Yii::$app->infoLog->add('unlink error', $fileName, '_delete-documents-error.txt');
-            \Yii::$app->infoLog->add('exception', $e, '_delete-documents-error.txt');
-            return false;
-        }
+        if(!Setting::findOne(['key' => 'cancel_unsigned'])->value) return false;
+        $this->canceled = 1;
+        return $this->update();
     }
 
     public function sendDocEmail($data)

@@ -17,7 +17,7 @@ class m230901_141546_templates extends Migration
             'id'                    => Schema::TYPE_PK,
 
             'name'                  => Schema::TYPE_STRING,
-            'content'               => 'longtext',
+            'content'               => Schema::TYPE_TEXT,
 
             'is_active'             => Schema::TYPE_SMALLINT . ' DEFAULT 1',
             'position'              => Schema::TYPE_INTEGER,

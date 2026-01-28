@@ -98,8 +98,7 @@ class Template extends BaseModel
 
     public function getCutName()
     {
-        $symbols = [' ', '/', '+'];
-        return str_replace($symbols, '_', $this->name);
+        return str_replace(' ', '_', $this->name);
     }
 
     public static function getListForCurrentUser()
@@ -188,7 +187,6 @@ class Template extends BaseModel
                 'user_name_short' => 'фио_текущего_сотрудника_(сокращенное)',
                 'time_from' => 'время_визита',
                 'service_list' => 'список_услуг_(таблица_без_врача)',
-                'service_list_day' => 'список_услуг_(таблица_без_врача)_за_день',
             ],
             'Другое' => [
                 'signature' => 'место_для_подписи',
