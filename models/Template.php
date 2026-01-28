@@ -98,7 +98,8 @@ class Template extends BaseModel
 
     public function getCutName()
     {
-        return str_replace(' ', '_', $this->name);
+        $symbols = [' ', '/', '+'];
+        return str_replace($symbols, '_', $this->name);
     }
 
     public static function getListForCurrentUser()
