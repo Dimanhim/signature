@@ -111,7 +111,7 @@ class Document extends BaseModel
     public function beforeDelete()
     {
         if($this->document_name) {
-            $filePath = \Yii::getAlias('@app/web/').'pdf/'.$this->document_name;
+            $filePath = \Yii::getAlias('@pdf/').$this->document_name;
             if(file_exists($filePath)) {
                 unlink($filePath);
             }
@@ -673,9 +673,9 @@ class Document extends BaseModel
 
     public function generatePdf($empty = false)
     {
-        $pdfDir = \Yii::getAlias('@app/web').'/pdf/';
+        $pdfDir = \Yii::getAlias('@pdf');
         if(!is_dir($pdfDir)) {
-            mkdir($pdfDir, 0755);
+            mkdir($pdfDir);
         }
 
         //$cssFileName = \Yii::getAlias('@app/web').'/css/pdf.css';
@@ -688,7 +688,7 @@ class Document extends BaseModel
 
         $dopText = $empty ? '_empty' : '';
         $documentName = $this->id.'_'.$this->template->cutName.'_'.date('d.m.y', $this->created_at).'_'.mt_rand(10000,100000).$dopText.'.pdf';
-        $pdf->filename = 'pdf/'.$documentName;
+        $pdf->filename = \Yii::getAlias('@pdf/') . $documentName;
         $this->document_name = $documentName;
         $this->save();
         try {
@@ -705,7 +705,7 @@ class Document extends BaseModel
     {
         //return true;
         if($this->document_name) {
-            if($content = file_get_contents(\Yii::getAlias('@app/web/').'pdf/'.$this->document_name)) {
+            if($content = file_get_contents(\Yii::getAlias('@pdf/').$this->document_name)) {
                 if($encode_content = base64_encode($content)) {
                     $params = [
                         'content' => $encode_content,
@@ -1006,7 +1006,7 @@ class Document extends BaseModel
 
     private function unlinkDocuments()
     {
-        $pdfDir = \Yii::getAlias('@app/web').'/pdf/';
+        $pdfDir = \Yii::getAlias('@pdf/');
 
         $lifetimeDays = Yii::$app->settings->getParam('lifetime_days');
         if(!$lifetimeDays) return false;
@@ -1032,7 +1032,7 @@ class Document extends BaseModel
     {
         if(!$fileName) return false;
 
-        $pdfDir = \Yii::getAlias('@app/web').'/pdf/';
+        $pdfDir = \Yii::getAlias('@pdf/');
         $filePath = $pdfDir.$fileName;
 
         try {
@@ -1059,7 +1059,7 @@ class Document extends BaseModel
                     ->setTo($data['email'])
                     ->setSubject($settings->doc_email_subject)
                     ->setHtmlBody($settings->doc_email_text)
-                    ->attach(\Yii::getAlias('@app/web/').'pdf/'.$this->document_name)
+                    ->attach(\Yii::getAlias('@pdf/').$this->document_name)
                     ->send();
             }
         }

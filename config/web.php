@@ -16,7 +16,7 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
         '@upload' => '@app/web/upload',
         '@tablet' => '@app/web/sign/img',
-        '@pdf' => '@app/web/pdf',
+        '@pdf' => '@app/pdf',
     ],
     'components' => [
         'request' => [

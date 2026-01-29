@@ -14,6 +14,7 @@ use app\models\Document;
 use app\models\Template;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\helpers\Html;
 use yii\web\Controller;
 
 class DocumentController extends BaseController
@@ -96,9 +97,9 @@ class DocumentController extends BaseController
                     if($model->save()) {
                         $model->generatePdf(true);
                         $model->cancelDocuments();
-                        $btn = '<a href="/pdf/'.$model->document_name.'" class="btn btn-sm btn-primary" target="_blank">Скачать</a>';
+                        $btn = Html::a('Скачать', ['document/download', 'id' => $model->id], ['class' => 'btn btn-sm btn-primary', 'target' => '_blanc']);
                         if($model->hasCustomParams()) {
-                            $btn .= '<a href="/document/update/?id='.$model->id.'" class="btn btn-sm btn-warning" style="margin-left: 10px;">Заполнить параметры</a>';
+                            $btn .= Html::a('Заполнить параметры', ['document/update', 'id' => $model->id], ['class' => 'btn btn-sm btn-warning', 'style' => 'v']);
                         }
                         if(!\Yii::$app->session->hasFlash('error')) {
                             Yii::$app->session->setFlash('success', 'Документ успешно отправлен на планшет '.$btn);
@@ -121,6 +122,24 @@ class DocumentController extends BaseController
         return $this->render('index', [
             'model' => $model,
         ]);
+    }
+
+    public function actionDownload($id)
+    {
+        $document = Document::findOne($id);
+        if(!$document) {
+            \Yii::$app->session->setFlash('error', "Не удалось скачать файл");
+            return $this->redirect(Yii::$app->request->referrer);
+        }
+
+        $filePath = \Yii::getAlias('@pdf/') . $document->document_name;
+
+        if (file_exists($filePath)) {
+            return \Yii::$app->response->sendFile($filePath, $document->document_name);
+        } else {
+            \Yii::$app->session->setFlash('error', "Файл не найден");
+            return $this->redirect(Yii::$app->request->referrer);
+        }
     }
 
     public function actionList($tablet_id = null)
