@@ -52,7 +52,13 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                         'filter' => Tablet::getList(),
                     ],
-                    'document_name',
+                    [
+                        'attribute' => 'document_name',
+                        'format' => 'raw',
+                        'value' => function($data) {
+                            return Html::a('Скачать', ['document/download', 'id' => $data->id], ['class' => 'btn btn-sm btn-primary']);
+                        }
+                    ],
                     [
                         'attribute' => 'is_signature',
                         'value' => function($data) {

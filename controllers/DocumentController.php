@@ -134,7 +134,7 @@ class DocumentController extends BaseController
 
         $filePath = \Yii::getAlias('@pdf/') . $document->document_name;
 
-        if (file_exists($filePath)) {
+        if ($document->document_name && file_exists($filePath)) {
             return \Yii::$app->response->sendFile($filePath, $document->document_name);
         } else {
             \Yii::$app->session->setFlash('error', "Файл не найден");
