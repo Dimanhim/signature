@@ -14,13 +14,15 @@ class SettingForm extends Model
     public $update_on_demand;
     public $document_css;
 
+    public $lifetime_days;
+
     private $availableForApi = ['update_on_demand'];
 
     public function rules()
     {
         return [
             [['app_name', 'rnova_api_url', 'rnova_api_key', 'tablet_url'], 'required'],
-            [['app_name', 'rnova_api_url', 'rnova_api_key', 'tablet_url', 'document_css'], 'string'],
+            [['app_name', 'rnova_api_url', 'rnova_api_key', 'tablet_url', 'document_css', 'lifetime_days'], 'string'],
             [['cancel_unsigned', 'update_on_demand'], 'boolean'],
         ];
     }
@@ -44,6 +46,7 @@ class SettingForm extends Model
             'cancel_unsigned' => $this->cancel_unsigned ? '1' : '0',
             'update_on_demand' => $this->update_on_demand ? '1' : '0',
             'document_css' => $this->document_css,
+            'lifetime_days' => $this->lifetime_days,
         ];
 
         foreach ($settings as $key => $value) {

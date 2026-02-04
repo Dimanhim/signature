@@ -79,6 +79,9 @@ $config = [
         'api' => [
             'class' => 'app\components\ApiComponent',
         ],
+        'settings' => [
+            'class' => 'app\components\SettingsComponent',
+        ],
         'db' => $db,
         'urlManager' => [
             'enablePrettyUrl' => true,
