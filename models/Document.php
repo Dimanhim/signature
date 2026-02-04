@@ -600,6 +600,15 @@ class Document extends BaseModel
         return $this->generatePdf($content);
     }
 
+    public function getPreparedContent()
+    {
+        return $this->content;
+        $symbols = ['<br>'];
+        $replaced = [''];
+
+        return str_replace($symbols, $replaced, $this->content);
+    }
+
     public function generatePdf($empty = false)
     {
         $pdfDir = \Yii::getAlias('@app/web').'/pdf/';
@@ -610,7 +619,7 @@ class Document extends BaseModel
         //$cssFileName = \Yii::getAlias('@app/web').'/css/pdf.css';
         // $cssFileName = \Yii::getAlias('@app/web').'/css/pdf-styles.css';
         $pdf = \Yii::$app->pdf;
-        $pdf->content = $this->content;
+        $pdf->content = $this->getPreparedContent();
         $pdf->destination = Pdf::DEST_FILE;
         // $pdf->cssFile = $cssFileName;
         $pdf->cssInline = Setting::findOne(['key' => 'document_css'])->value ?? '';
@@ -620,7 +629,14 @@ class Document extends BaseModel
         $pdf->filename = 'pdf/'.$documentName;
         $this->document_name = $documentName;
         $this->save();
-        return $pdf->render();
+        try {
+            $pdf->render();
+            return true;
+        }
+        catch(\Exception $e) {
+            \Yii::$app->session->setFlash('error', "Не удалось создать документ");
+            return false;
+        }
     }
 
     public function uploadFile()

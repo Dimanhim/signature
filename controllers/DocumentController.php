@@ -87,7 +87,9 @@ class DocumentController extends BaseController
                         $model->generatePdf(true);
                         $model->cancelDocuments();
                         $btn = '<a href="/pdf/'.$model->document_name.'" class="btn btn-sm btn-primary" target="_blank">Скачать</a>';
-                        Yii::$app->session->setFlash('success', 'Документ успешно отправлен на планшет '.$btn);
+                        if(!\Yii::$app->session->hasFlash('error')) {
+                            Yii::$app->session->setFlash('success', 'Документ успешно отправлен на планшет '.$btn);
+                        }
                     }
 
                     // раскомментировать для отладки генерации документа
