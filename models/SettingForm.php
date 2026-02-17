@@ -79,9 +79,22 @@ class SettingForm extends Model
         return true;
     }
 
-    public function handleImages()
+    private function setImages()
     {
-        $data = json_decode($this->images, true);
+        if(!$this->images) {
+            $data = [];
+            foreach($this->_default_images as $imageName => $image) {
+                $data[$imageName] = "";
+            }
+            $this->images = json_encode($data);
+        }
+    }
+
+    private function handleImages()
+    {
+        $this->setImages();
+
+        $data = json_decode($this->images, true) ?? null;
 
         if($this->image_fields) {
             foreach($this->image_fields as $imageName => $image) {
