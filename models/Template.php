@@ -191,7 +191,17 @@ class Template extends BaseModel
             'Другое' => [
                 'signature' => 'место_для_подписи',
                 'current_date' => 'текущая_дата',
-                'current_time' => 'текущее_время'
+                'current_time' => 'текущее_время',
+
+                'appointment_price_full_by_day' => 'сумма_услуг_за_день',
+                'invoice_services_count' => 'кол-во_оказанных_услуг',
+                'invoice_sum' => 'сумма_счета',
+                'invoice_services' => 'список_оказанных_услуг',
+                'appointment_id' => '№_визита',
+
+                'user_name' => 'фио_текущего_сотрудника',
+                'user_document_number' => 'номер_доверенности_текущего_сотрудника',
+                'user_document_date' => 'дата_доверенности_текущего_сотрудника',
             ]
         ];
     }

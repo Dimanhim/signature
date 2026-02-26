@@ -48,6 +48,18 @@ class Helpers
         return 0;
     }
 
+    public static function isTimeToday($timeStart)
+    {
+        if(is_string($timeStart)) {
+            $timeStart = strtotime($timeStart);
+        }
+
+        $start = strtotime(date('d.m.Y', $timeStart));
+        $today = strtotime(date('d.m.Y'));
+
+        return $start == $today;
+    }
+
     public static function getFileInputOptions()
     {
         return [

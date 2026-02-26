@@ -35,6 +35,30 @@ class ApiComponent extends BaseComponent
     {
         return $this->api->getRequest('getAppointments', $params);
     }
+    public function getAppointmentServices($params = [])
+    {
+        return $this->api->getRequest('v2/getAppointmentServices', $params);
+    }
+
+    public function getInvoices($params = [])
+    {
+        return $this->api->getRequest('v2/getInvoices', $params);
+    }
+
+    public function getInvoiceServices($params = [])
+    {
+        return $this->api->getRequest('v2/getInvoiceServices', $params);
+    }
+
+    public function getUsers($params = [])
+    {
+        return $this->api->getRequest('getUsers', $params);
+    }
+
+    public function getServices($params = [])
+    {
+        return $this->api->getRequest('getServices', $params);
+    }
 
     public function getPatient($params = [])
     {
