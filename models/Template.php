@@ -193,7 +193,9 @@ class Template extends BaseModel
             'Другое' => [
                 'signature' => 'место_для_подписи',
                 'current_date' => 'текущая_дата',
-                'current_time' => 'текущее_время'
+                'current_time' => 'текущее_время',
+
+                'appointment_price_full_by_day' => 'сумма_услуг_за_день',
             ]
         ];
     }

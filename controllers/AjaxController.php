@@ -34,7 +34,7 @@ class AjaxController extends Controller
     {
         if(!$appointment_id = Yii::$app->request->post('appointment_id')) return $this->res;
         $model = new Document(['appointment_id' => $appointment_id]);
-        $appointment = $model->getAppointment();
+        $appointment = $model->getAppointments();
         if(!$appointment) {
             $this->res['message'] = $model->getAppointmentErrorMessage();
             return $this->res;

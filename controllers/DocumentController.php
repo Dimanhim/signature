@@ -62,7 +62,18 @@ class DocumentController extends BaseController
 
             $clinic = null;
             $patient = null;
-            $appointments = $model->getAppointment();
+
+            $model->getAppointments();
+            $appointmentServices = $model->getAppointmentServices();
+            $invoiceIds = $model->getInvoiceIds();
+            $invoices = $model->getInvoices();
+            $invoiceServices = $model->getInvoiceServices();
+            //$users = $model->getUsers();
+            //$services = $model->getServices();
+
+            $model->setCustomFields();
+
+            $appointments = $model->getAppointments();
 
             if($appointments and isset($appointments['clinic_id'])) {
                 $clinic = $model->getClinic($appointments['clinic_id']);
@@ -80,9 +91,13 @@ class DocumentController extends BaseController
                 $model->addDocumentError('Пациент не найден');
             }
 
-            //\Yii::$app->infoLog->add('appointments', $appointments, '__appointments-log.txt');
-            //\Yii::$app->infoLog->add('clinic', $clinic, '__clinic-log.txt');
-            //\Yii::$app->infoLog->add('patient', $patient, '__patient-log.txt');
+//            \Yii::$app->infoLog->add('appointments', $appointments, '__appointments-log.txt');
+//            \Yii::$app->infoLog->add('appointmentServices', $appointmentServices, '__appointment_services-log.txt');
+//            \Yii::$app->infoLog->add('clinic', $clinic, '__clinic-log.txt');
+//            \Yii::$app->infoLog->add('patient', $patient, '__patient-log.txt');
+//            \Yii::$app->infoLog->add('invoiceIds', $invoiceIds, '__invoiceIds-log.txt');
+//            \Yii::$app->infoLog->add('invoices', $invoices, '__invoices-log.txt');
+//            \Yii::$app->infoLog->add('invoiceServices', $invoiceServices, '__invoiceServices-log.txt');
 
             if($appointments and $clinic and $patient) {
                 $model->setAvaliablePatterns();

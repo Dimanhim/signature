@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\components\ApiHelper;
 use app\components\Helpers;
+use app\models\traits\CustomFields;
 use kartik\mpdf\Pdf;
 use Yii;
 use yii\base\Model;
@@ -12,6 +13,7 @@ use yii\helpers\ArrayHelper;
 
 class Document extends BaseModel
 {
+    use CustomFields;
     const FILE_PATH = 'pdf/template.pdf';
 
     public $_avaliable_patterns = [
@@ -21,6 +23,15 @@ class Document extends BaseModel
     ];
 
     public $documentErrors = [];
+
+    private $appointments = [];
+    private $appointment_services = [];
+    private  $invoiceIds = [];
+    private  $invoices;
+
+    private $invoice_services = [];
+    private $users;
+    private $services;
 
     /**
      * {@inheritdoc}
@@ -273,12 +284,12 @@ class Document extends BaseModel
         return $data;
     }
 
-    public function getServicesNoPriceFromData($items)
+    public function getServicesNoPriceFromData()
     {
         $str = '';
-        if(isset($items['services']) and $items['services']) {
+        if(isset($this->appointments['services']) and $this->appointments['services']) {
             $str .= '<ul>';
-            foreach($items['services'] as $itemService) {
+            foreach($this->appointments['services'] as $itemService) {
                 $str .= '<li>' . $itemService['title'] .'</li>';
             }
             $str .= '</ul>';
@@ -286,13 +297,13 @@ class Document extends BaseModel
         return $str;
     }
 
-    public function getServicesListFromData($items)
+    public function getServicesListFromData()
     {
         $str = '';
         $count = 1;
         $totalQty = 0;
         $totalPrice = 0;
-        if(isset($items['services']) and $items['services']) {
+        if(isset($this->appointments['services']) and $this->appointments['services']) {
             $str .= '<table class="table-services-list">';
             $str .=   '<tr>';
             $str .=     "<th></th>";
@@ -303,7 +314,7 @@ class Document extends BaseModel
             $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>Сумма</font></font></th>";
             $str .=   '</tr>';
 
-            foreach($items['services'] as $itemService) {
+            foreach($this->appointments['services'] as $itemService) {
 
                 $totalQty += $itemService['count'];
                 $totalPrice += $itemService['value'];
@@ -332,13 +343,13 @@ class Document extends BaseModel
         return $str;
     }
 
-    public function getServicesListDayFromData($items)
+    public function getServicesListDayFromData()
     {
         $str = '';
         $count = 1;
         $totalQty = 0;
         $totalPrice = 0;
-        if(isset($items['services']) and $items['services']) {
+        if(isset($this->appointments['services']) and $this->appointments['services']) {
             $str .= '<table class="table-services-list">';
             $str .=   '<tr>';
             $str .=     "<th></th>";
@@ -349,8 +360,8 @@ class Document extends BaseModel
             $str .=     "<th><font face='Carlito, sans-serif'><font style='font-size: 11px;'>Сумма</font></font></th>";
             $str .=   '</tr>';
 
-            foreach($items['services'] as $itemService) {
-                if(!Helpers::isTimeToday($items['time_start'])) continue;
+            foreach($this->appointments['services'] as $itemService) {
+                if(!Helpers::isTimeToday($this->appointments['time_start'])) continue;
 
                 $totalQty += $itemService['count'];
                 $totalPrice += $itemService['value'];
@@ -379,11 +390,11 @@ class Document extends BaseModel
         return $str;
     }
 
-    public function getPriceFullFromData($items)
+    public function getPriceFullFromData()
     {
         $servicePrice = 0;
-        if(isset($items['services']) and $items['services']) {
-            foreach($items['services'] as $itemService) {
+        if(isset($this->appointments['services']) and $this->appointments['services']) {
+            foreach($this->appointments['services'] as $itemService) {
                 $servicePrice += $itemService['price'];
             }
         }
@@ -459,32 +470,172 @@ class Document extends BaseModel
         return false;
     }*/
 
+    public function getAppointments()
+    {
+        if(!$this->appointments) {
+            $this->setAppointments();
+        }
+        return $this->appointments;
+    }
+
+    public function getAppointmentServices()
+    {
+        if(!$this->appointment_services) {
+            $this->setAppointmentServices();
+        }
+        return $this->appointment_services;
+    }
+
+    public function getInvoiceIds()
+    {
+        if($this->appointment_services) {
+            foreach($this->appointment_services as $appointmentId => $appointmentServices) {
+                if($appointmentServices) {
+                    foreach($appointmentServices as $appointmentService) {
+                        if(!in_array($appointmentService['invoice_id'], $this->invoiceIds)) {
+                            $this->invoiceIds[] = $appointmentService['invoice_id'];
+                        }
+                    }
+                }
+            }
+        }
+        return $this->invoiceIds;
+    }
+
+    public function getInvoices()
+    {
+        if(!$this->invoices) {
+            $this->setInvoices();
+        }
+        return $this->invoices;
+    }
+
+    public function getInvoiceServices()
+    {
+        if(!$this->invoice_services) {
+            $this->setInvoiceServices();
+        }
+        return $this->invoice_services;
+    }
+
+    public function getUsers()
+    {
+        if(!$this->users) {
+            $this->setUsers();
+        }
+        return $this->users;
+    }
+
+    public function getServices()
+    {
+        if(!$this->services) {
+            $this->setServices();
+        }
+        return $this->services;
+    }
+
     /**
      * получить визит по его id
      */
-    public function getAppointment()
+    private function setAppointments()
     {
         $params = [
             'appointment_id' => $this->appointment_id,
         ];
         if($requestedData = Yii::$app->api->getAppointments($params)) {
-            $result = null;
             if($data = ApiHelper::getDataFromApi($requestedData)) {
                 if(isset($data[0])) {
-                    $result = $data[0];
-                    $result['visit_date'] = isset($result['time_start']) ? date('d.m.Y', strtotime($result['time_start']))  : '';
-                    $result['time_from'] = isset($result['time_start']) ? date('H:i', strtotime($result['time_start']))  : '';
-                    $result['services_no_price'] = $this->getServicesNoPriceFromData($result);
-                    $result['service_list'] = $this->getServicesListFromData($result);
-                    $result['service_list_day'] = $this->getServicesListDayFromData($result);
-                    $result['price_full'] = $this->getPriceFullFromData($result);
-                    $result['user_name_short'] = $result['author_name'];
+                    $this->appointments = $data[0];
+                    $this->appointments['visit_date'] = isset($this->appointments['time_start']) ? date('d.m.Y', strtotime($this->appointments['time_start']))  : '';
+                    $this->appointments['time_from'] = isset($this->appointments['time_start']) ? date('H:i', strtotime($this->appointments['time_start']))  : '';
+                    $this->appointments['services_no_price'] = $this->getServicesNoPriceFromData();
+                    $this->appointments['service_list'] = $this->getServicesListFromData();
+                    $this->appointments['service_list_day'] = $this->getServicesListDayFromData();
+                    $this->appointments['price_full'] = $this->getPriceFullFromData();
+                    $this->appointments['user_name_short'] = $this->appointments['author_name'];
                 }
             }
-            return $result;
         }
-        return false;
+        return $this->appointments;
     }
+
+    public function setCustomFields()
+    {
+        $this->getCustomServices();
+        $this->appointments['appointment_price_full_by_day'] = $this->getCustomAppointmentPriceFullByDay();
+    }
+
+    private function setAppointmentServices()
+    {
+        $params = [
+            'appointment_id' => $this->appointment_id,
+        ];
+        if($requestedData = Yii::$app->api->getAppointmentServices($params)) {
+            if($data = ApiHelper::getDataFromApi($requestedData)) {
+                $this->appointment_services = $data;
+            }
+        }
+        return $this->appointment_services;
+    }
+
+    private function setInvoices()
+    {
+        if(!$this->invoiceIds) return false;
+
+        $params = [
+            'invoice_id' => implode(',', $this->invoiceIds),
+        ];
+        if($requestedData = Yii::$app->api->getInvoices($params)) {
+            if($data = ApiHelper::getDataFromApi($requestedData)) {
+                $this->invoices = $data;
+            }
+        }
+        return $this->invoices;
+    }
+
+    private function setInvoiceServices()
+    {
+        if(!$this->invoiceIds) return false;
+
+        $params = [
+            'invoice_id' => implode(',', $this->invoiceIds),
+        ];
+        if($requestedData = Yii::$app->api->getInvoiceServices($params)) {
+            if($data = ApiHelper::getDataFromApi($requestedData)) {
+                $this->invoice_services = $data;
+            }
+        }
+        return $this->invoice_services;
+    }
+
+    private function setUsers()
+    {
+        if($requestedData = Yii::$app->api->getUsers()) {
+            if($data = ApiHelper::getDataFromApi($requestedData)) {
+                foreach($data as $item) {
+                    $this->users[$item['id']] = $item;
+                }
+            }
+        }
+        return $this->users;
+    }
+
+    private function setServices()
+    {
+        if($requestedData = Yii::$app->api->getServices()) {
+            if($data = ApiHelper::getDataFromApi($requestedData)) {
+                foreach($data as $item) {
+                    $this->services[$item['service_id']] = $item;
+                }
+            }
+        }
+        return $this->users;
+    }
+
+
+
+
+
 
     /**
      * получить пациента по его id
