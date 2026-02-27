@@ -1,0 +1,16 @@
+@font-face {
+    font-weight: 400;
+    font-family: "PT_Sans";
+    font-style: normal;
+    src: url("../fonts/PT_Sans/PTSans-Regular.ttf") format("truetype");
+    font-display: swap;
+}
+body {
+    position: relative;
+    color: #161616;
+    font-weight: 400;
+    font-size: 18px;
+    font-family: "PT_Sans";
+    line-height: 1.56;
+    background-color: #ffffff;
+}
