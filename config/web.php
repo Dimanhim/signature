@@ -39,10 +39,21 @@ $config = [
             'errorAction' => 'site/error',
         ],
         'mailer' => [
-            'class' => \yii\symfonymailer\Mailer::class,
+            'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@app/mail',
-            // send all mails to a file by default.
-            'useFileTransport' => true,
+            'useFileTransport' => false,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => 'smtp.yandex.ru',
+                'username' => 'd.tereshchenko@rnova.ru',
+                'password' => 'dhzkwiqvnwcqyjjw',
+                'port' => '465',
+                'encryption' => 'ssl',
+                'timeout' => 10,
+            ],
+        ],
+        'mailSender' => [
+            'class' => 'app\components\MailSenderComponent',
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,

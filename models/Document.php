@@ -9,9 +9,12 @@ use Yii;
 use yii\base\Model;
 use app\models\Setting;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 class Document extends BaseModel
 {
+    const SIGNATURE_WIDTH = 300;
+
     const FILE_PATH = 'pdf/template.pdf';
 
     public $_avaliable_patterns = [
@@ -21,6 +24,8 @@ class Document extends BaseModel
     ];
 
     public $documentErrors = [];
+
+    public $_patient;
 
     /**
      * {@inheritdoc}
@@ -56,7 +61,7 @@ class Document extends BaseModel
         return array_merge(parent::rules(), [
             [['appointment_id', 'template_id', 'tablet_id'], 'required'],
             [['appointment_id', 'template_id', 'tablet_id', 'patient_id', 'user_id', 'canceled'], 'integer'],
-            [['patient_name', 'patient_birthday', 'document_name'], 'string', 'max' => 255],
+            [['patient_name', 'patient_birthday', 'document_name', 'patient_email'], 'string', 'max' => 255],
             [['content', 'full_content'], 'string'],
             [['is_signature'], 'safe'],
         ]);
@@ -74,6 +79,7 @@ class Document extends BaseModel
             'content' => 'Html-контент документа',
             'full_content' => 'Весь html-контент',
             'patient_name' => 'ФИО пациента',
+            'patient_email' => 'Email пациента',
             'patient_birthday' => 'Дата рождения пациента',
             'document_name' => 'PDF документ',
             'patient_id' => 'Пациент',
@@ -151,6 +157,15 @@ class Document extends BaseModel
     public function setContent()
     {
         $this->content = $this->template->content;
+
+        $customPatternStr = '{добавленная_подпись}';
+        $img = null;
+        if($userSignature = Yii::$app->settings->signature) {
+            $img = Html::img($userSignature, ['width' => self::SIGNATURE_WIDTH]);
+        }
+
+        $this->content = str_replace($customPatternStr, $img, $this->content);
+
         $this->full_content = $this->content;
         return $this->content;
     }
@@ -533,7 +548,9 @@ class Document extends BaseModel
                     }
                 }
             }
-            return $data;
+            $this->_patient = $data;
+            $this->patient_email = $data['patient_email'];
+            return $this->_patient;
         }
         return false;
     }
@@ -745,6 +762,37 @@ class Document extends BaseModel
         }
     }
 
+    public function sendPatientEmail()
+    {
+        if(!Yii::$app->settings->getParam('send_patient_email')) {
+            return false;
+        }
+        if (!$this->patient_email) {
+            $this->addDocumentError("Email пациента не указан");
+            return false;
+        }
+
+        $filePath = \Yii::getAlias('@pdf/') . $this->document_name;
+        if (!$this->document_name || !file_exists($filePath)) {
+            $this->addDocumentError("Документ не найден");
+            return false;
+        }
+
+        try {
+            \Yii::$app->mailSender->sendWithAttachment(
+                $this->patient_email,
+                'Ваш медицинский документ',
+                ['text' => "Здравствуйте, {$this->patient_name}! Ваш документ \"" . ($this->template->name ?? 'МРТшка') . "\" во вложении."],
+                $this->document_name
+            );
+        } catch (\Exception $e) {
+            \Yii::error("Ошибка отправки email: " . $e->getMessage());
+            $this->addDocumentError("Сбой почтового сервера");
+            return false;
+        }
+    }
+
+
     public function upload()
     {
 
@@ -804,6 +852,7 @@ class Document extends BaseModel
         foreach($signaturesPatterns as $signaturePattern => $signaturePath) {
             $fullContent = str_replace($signaturePattern, $signaturePath, $fullContent);
         }
+
         $this->content = $fullContent;
         return $this->content;
     }

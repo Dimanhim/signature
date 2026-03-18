@@ -8,6 +8,7 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use app\models\UserSignature;
 
 /**
  * IndustryController implements the CRUD actions for Industry model.
@@ -115,6 +116,17 @@ class TabletController extends BaseController
         $model = $this->findModel($id);
 
         return $this->render('sign', [
+            'model' => $model
+        ]);
+    }
+
+    public function actionSignature()
+    {
+        $this->layout = 'sign';
+
+        $model = \Yii::$app->settings->getSignatureModel();
+
+        return $this->render('signature', [
             'model' => $model
         ]);
     }

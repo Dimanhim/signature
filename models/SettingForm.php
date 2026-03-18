@@ -17,7 +17,7 @@ class SettingForm extends Model
     public $tablet_css;
     public $images;
     public $lifetime_days;
-
+    public $send_patient_email;
     public $image_fields;
 
     private $availableForApi = ['update_on_demand'];
@@ -35,7 +35,7 @@ class SettingForm extends Model
             [['app_name', 'rnova_api_url', 'rnova_api_key', 'tablet_url'], 'required'],
             [['app_name', 'rnova_api_url', 'rnova_api_key', 'tablet_url', 'document_css', 'tablet_css', 'lifetime_days'], 'string'],
             [['images', 'image_fields'], 'safe'],
-            [['cancel_unsigned', 'update_on_demand'], 'boolean'],
+            [['cancel_unsigned', 'update_on_demand', 'send_patient_email'], 'boolean'],
         ];
     }
 
@@ -63,6 +63,7 @@ class SettingForm extends Model
             'tablet_css' => $this->tablet_css,
             'images' => $this->images,
             'lifetime_days' => $this->lifetime_days,
+            'send_patient_email' => $this->send_patient_email,
         ];
 
         foreach ($settings as $key => $value) {

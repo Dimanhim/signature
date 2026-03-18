@@ -47,7 +47,7 @@ class ApiController extends Controller
 
     public function getImageData($signatures)
     {
-        $imgWidth = 300;
+        $imgWidth = Document::SIGNATURE_WIDTH;
         $data = [];
         if($signatures) {
             foreach($signatures as $signatureID => $signatureSrc) {
@@ -116,6 +116,40 @@ class ApiController extends Controller
         }
         return $this->responseValue();
     }
+
+    public function actionSaveSignature()
+    {
+        $signatureData = Yii::$app->request->post('signature');
+
+        if (!$signatureData) {
+            $this->api->addError('Данные подписи не переданы');
+            return $this->responseValue();
+        }
+
+        $userId = Yii::$app->user->id;
+        if (!$userId) {
+            $this->api->addError('Пользователь не авторизован');
+            return $this->responseValue();
+        }
+
+        $model = \app\models\UserSignature::findOne(['user_id' => $userId])
+            ?: new \app\models\UserSignature(['user_id' => $userId]);
+
+        $model->signature_data = $signatureData;
+        $model->is_active = 1;
+
+        if ($model->save()) {
+            Yii::$app->settings->setSignature();
+
+            $this->api->result['message'] = 'Образец подписи успешно сохранен';
+            $this->api->result['error'] = 0;
+        } else {
+            $this->api->addError('Ошибка сохранения: ' . implode(', ', $model->getFirstErrors()));
+        }
+
+        return $this->responseValue();
+    }
+
 
 
 

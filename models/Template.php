@@ -192,6 +192,7 @@ class Template extends BaseModel
             ],
             'Другое' => [
                 'signature' => 'место_для_подписи',
+                'custom_signature' => 'добавленная_подпись',
                 'current_date' => 'текущая_дата',
                 'current_time' => 'текущее_время'
             ]

@@ -4,10 +4,13 @@ namespace app\components;
 
 use app\models\Setting;
 use yii\base\Component;
+use app\models\UserSignature;
 
 class SettingsComponent extends Component
 {
     private $data;
+    private $signature = null;
+    private $signatureModel = null;
 
     /**
      *
@@ -15,6 +18,7 @@ class SettingsComponent extends Component
     public function init()
     {
         $this->setSettings();
+        $this->setSignature();
         parent::init();
     }
 
@@ -31,6 +35,32 @@ class SettingsComponent extends Component
         foreach($settings as $setting) {
             $this->data[$setting->key] = $setting->value;
         }
+    }
+
+    public function setSignature()
+    {
+        if (!\Yii::$app->user->isGuest) {
+            $this->signatureModel = UserSignature::findOne([
+                'user_id' => \Yii::$app->user->id,
+                'is_active' => 1
+            ]);
+        }
+    }
+
+    public function getSignatureModel()
+    {
+        if ($this->signatureModel) {
+            return $this->signatureModel;
+        }
+
+        return new UserSignature([
+            'user_id' => !\Yii::$app->user->isGuest ? \Yii::$app->user->id : null
+        ]);
+    }
+
+    public function getSignature()
+    {
+        return $this->signatureModel->signature_data ?? null;
     }
 
     /**

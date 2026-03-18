@@ -9,6 +9,7 @@ use yii\widgets\ActiveForm;
 $this->title = 'Создание документа';
 $this->params['breadcrumbs'][] = ['label' => $model->modelName, 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
+$signature = Yii::$app->settings->signature;
 ?>
 <div class="document-index">
     <div class="card">
@@ -18,7 +19,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="card-body">
             <?php $form = ActiveForm::begin(); ?>
             <div class="row">
-                <div class="col-md-8">
+                <div class="col-md-7">
                     <div class="card">
                         <div class="card-body">
                             <?= $form->field($model, 'appointment_id')->textInput(['maxlength' => true]) ?>
@@ -37,6 +38,27 @@ $this->params['breadcrumbs'][] = $this->title;
                             <div class="form-group">
                                 <?= Html::submitButton('Создать', ['class' => 'btn btn-success']) ?>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="card">
+                        <div class="card-header">
+                            Ваш текущий образец подписи
+                        </div>
+                        <div class="card-body">
+                            <?php if($signature) : ?>
+                                <div>
+                                    <?= Html::img($signature, ['style' => 'width: 200px;']) ?>
+                                </div>
+                                <div>
+                                    <?= Html::a('Редактировать', ['tablet/signature'], ['class' => 'btn btn-primary']) ?>
+                                </div>
+                            <?php else : ?>
+                                <div>
+                                    <?= Html::a('Создать', ['tablet/signature'], ['class' => 'btn btn-primary']) ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
