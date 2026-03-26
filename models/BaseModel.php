@@ -185,7 +185,7 @@ class BaseModel extends ActiveRecord
         $prefix = Yii::$app->db->tablePrefix;
         $dirName = str_replace([$prefix, '{', '}', '%'], '', self::className()::tableName());
         $filesDir = Yii::getAlias('@upload')."/{$dirName}/";
-        if (!file_exists($filesDir)) mkdir($filesDir, 0777, true);
+        if (!file_exists($filesDir)) mkdir($filesDir, 0755, true);
 
         if($files = UploadedFile::getInstances($this, 'image_fields')) {
             if(!$gallery = $this->gallery) {
