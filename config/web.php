@@ -89,6 +89,8 @@ $config = [
         ],
         'api' => [
             'class' => 'app\components\ApiComponent',
+            //'agreement_email_id' => 3988, // documentCreator
+            'agreement_email_id' => 3756, // mismrt.ru
         ],
         'settings' => [
             'class' => 'app\components\SettingsComponent',

@@ -11,6 +11,8 @@ class ApiComponent extends BaseComponent
 {
     private $api;
 
+    public $agreement_email_id;
+
     const STATUS_ID_WRITED = 1;     // записан
     const STATUS_ID_WAIT   = 2;     // ожидает
     const STATUS_ID_BUSY   = 3;     // на приеме  upcoming
@@ -49,6 +51,11 @@ class ApiComponent extends BaseComponent
     public function cancelAppointment($params = [])
     {
         return $this->api->getRequest('cancelAppointment', $params);
+    }
+
+    public function addPatientCategory($params = [])
+    {
+        return $this->api->getRequest('addPatientCategory', $params);
     }
 
     public function uploadFile($params = [])

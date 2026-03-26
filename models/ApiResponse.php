@@ -79,6 +79,7 @@ class ApiResponse
                 if(!$document->hasDocumentErrors()) {
                     if($document->saveSignatures($data['signatures'])) {
                         $document->sendPatientEmail();
+                        $document->sendPatientEmailAgreement();
                         $this->result['message'] = 'Успешно добавлено '.count($data['signatures']).' подписей, документ отправлен';
                     }
                 }

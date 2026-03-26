@@ -792,6 +792,16 @@ class Document extends BaseModel
         }
     }
 
+    public function sendPatientEmailAgreement()
+    {
+        if($agreement_email_id = Yii::$app->api->agreement_email_id) {
+            $request = Yii::$app->api->addPatientCategory(['patient_id' => $this->patient_id, 'category_id' => $agreement_email_id]);
+            \Yii::$app->infoLog->add('set agreement email', $request, 'patient-agreement-email.txt');
+            return $request;
+        }
+        return false;
+    }
+
 
     public function upload()
     {
