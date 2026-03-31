@@ -1,0 +1,16 @@
+@font-face {
+    font-weight: 400;
+    font-family: "Montserrat";
+    font-style: normal;
+    src: url("../fonts/Montserrat/Montserrat-Regular.ttf") format("truetype");
+    font-display: swap;
+}
+body {
+    position: relative;
+    color: #000;
+    font-weight: 400;
+    font-size: 18px;
+    font-family: "Montserrat";
+    line-height: 1.56;
+    background-color: #ffffff;
+}
