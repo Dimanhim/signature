@@ -194,7 +194,17 @@ class Template extends BaseModel
                 'signature' => 'место_для_подписи',
                 'current_date' => 'текущая_дата',
                 'current_time' => 'текущее_время'
-            ]
+            ],
+            'custom' => [
+                'clinic_city' => 'город_клиники',                                       //
+                'document_date' => 'дата_создания_документа',                           // ??
+                //'document_docuument_date' => 'дата_создания_связанного_документа',
+                'patient_name_short' => 'фио_пациента_(сокращенное)',                   //  !
+                'representative_name_short' => 'фио_зак-го_предст-ля_(сокращенное)',    //  !
+                'appointment_first_date' => 'дата_первого_визита',
+                'foreigner_last_name_passport' => 'фамилия_паспорт_иностранца',         //  ??
+                'foreigner_first_passport' => 'имя_паспорт_иностранца',                 //  ??
+            ],
         ];
     }
 

@@ -22,6 +22,11 @@ class Document extends BaseModel
 
     public $documentErrors = [];
 
+    private $patient;
+    private $appointment;
+    private $clinics;
+    private $clinic;
+
     /**
      * {@inheritdoc}
      */
@@ -229,10 +234,10 @@ class Document extends BaseModel
     {
         return [
             'search' => [
-                '{текущая_дата}', '{текущее_время}'
+                '{текущая_дата}', '{текущее_время}','{дата_создания_документа}'
             ],
             'replacement' => [
-                date('d.m.Y'), date('H:i')
+                date('d.m.Y'), date('H:i'), date('d.m.Y')
             ],
         ];
     }
@@ -273,8 +278,9 @@ class Document extends BaseModel
         return $data;
     }
 
-    public function getServicesNoPriceFromData($items)
+    public function getServicesNoPriceFromData()
     {
+        $items = $this->appointment;
         $str = '';
         if(isset($items['services']) and $items['services']) {
             $str .= '<ul>';
@@ -286,8 +292,10 @@ class Document extends BaseModel
         return $str;
     }
 
-    public function getServicesListFromData($items)
+    public function getServicesListFromData()
     {
+        $items = $this->appointment;
+
         $str = '';
         $count = 1;
         $totalQty = 0;
@@ -332,8 +340,10 @@ class Document extends BaseModel
         return $str;
     }
 
-    public function getServicesListDayFromData($items)
+    public function getServicesListDayFromData()
     {
+        $items = $this->appointment;
+
         $str = '';
         $count = 1;
         $totalQty = 0;
@@ -379,8 +389,10 @@ class Document extends BaseModel
         return $str;
     }
 
-    public function getPriceFullFromData($items)
+    public function getPriceFullFromData()
     {
+        $items = $this->appointment;
+
         $servicePrice = 0;
         if(isset($items['services']) and $items['services']) {
             foreach($items['services'] as $itemService) {
@@ -388,6 +400,31 @@ class Document extends BaseModel
             }
         }
         return $servicePrice;
+    }
+
+    public function getAppointmentFirstDate($appointment = null)
+    {
+        if($appointment === null) {
+            $appointment = $this->appointment;
+        }
+        if($appointment['is_first']) return date('d.m.Y', strtotime($appointment['time_start']));
+
+        if(!empty($appointment['moved_from'])) {
+            sleep(1);
+            $params = [
+                'appointment_id' => $appointment['moved_from'],
+            ];
+            if($requestedData = Yii::$app->api->getAppointments($params)) {
+                if($data = ApiHelper::getDataFromApi($requestedData)) {
+                    if(isset($data[0])) {
+                        return $this->getAppointmentFirstDate($data[0]);
+                    }
+                }
+            }
+
+        }
+
+        return isset($appointment['time_start']) ? date('d.m.Y', strtotime($appointment['time_start'])) : null;
     }
 
     public static function setParamValue($paramNameMis, $data_value, $paramName, Template $template = null)
@@ -426,16 +463,18 @@ class Document extends BaseModel
     {
         if($requestedData = Yii::$app->api->getClinics()) {
             if($data = ApiHelper::getDataFromApi($requestedData)) {
+                $this->clinics = $data;
                 foreach($data as $clinic) {
                     if($clinic['id'] == $clinic_id) {
-                        $clinic['clinic_email'] = $clinic['email'];
-                        $clinic['clinic_phone'] = $clinic['phone'];
-                        $clinic['clinic_site'] = $clinic['site'];
-                        $clinic['clinic_bic'] = $clinic['bic'];
-                        $clinic['clinic_bank'] = $clinic['bank'];
-                        $clinic['clinic_cor_account'] = $clinic['cor_account'];
-                        $clinic['clinic_account'] = $clinic['account'];
-                        return $clinic;
+                        $this->clinic['id'] = $clinic['id'];
+                        $this->clinic['clinic_city'] = $clinic['city'];
+                        $this->clinic['clinic_phone'] = $clinic['phone'];
+                        $this->clinic['clinic_site'] = $clinic['site'];
+                        $this->clinic['clinic_bic'] = $clinic['bic'];
+                        $this->clinic['clinic_bank'] = $clinic['bank'];
+                        $this->clinic['clinic_cor_account'] = $clinic['cor_account'];
+                        $this->clinic['clinic_account'] = $clinic['account'];
+                        return $this->clinic;
                     }
                 }
             }
@@ -468,20 +507,20 @@ class Document extends BaseModel
             'appointment_id' => $this->appointment_id,
         ];
         if($requestedData = Yii::$app->api->getAppointments($params)) {
-            $result = null;
             if($data = ApiHelper::getDataFromApi($requestedData)) {
                 if(isset($data[0])) {
-                    $result = $data[0];
-                    $result['visit_date'] = isset($result['time_start']) ? date('d.m.Y', strtotime($result['time_start']))  : '';
-                    $result['time_from'] = isset($result['time_start']) ? date('H:i', strtotime($result['time_start']))  : '';
-                    $result['services_no_price'] = $this->getServicesNoPriceFromData($result);
-                    $result['service_list'] = $this->getServicesListFromData($result);
-                    $result['service_list_day'] = $this->getServicesListDayFromData($result);
-                    $result['price_full'] = $this->getPriceFullFromData($result);
-                    $result['user_name_short'] = $result['author_name'];
+                    $this->appointment = $data[0];
+                    $this->appointment['visit_date'] = isset($this->appointment['time_start']) ? date('d.m.Y', strtotime($this->appointment['time_start']))  : '';
+                    $this->appointment['time_from'] = isset($this->appointment['time_start']) ? date('H:i', strtotime($this->appointment['time_start']))  : '';
+                    $this->appointment['services_no_price'] = $this->getServicesNoPriceFromData();
+                    $this->appointment['service_list'] = $this->getServicesListFromData();
+                    $this->appointment['service_list_day'] = $this->getServicesListDayFromData();
+                    $this->appointment['price_full'] = $this->getPriceFullFromData();
+                    $this->appointment['appointment_first_date'] = $this->getAppointmentFirstDate();
+                    $this->appointment['user_name_short'] = $this->appointment['author_name'];
                 }
             }
-            return $result;
+            return $this->appointment;
         }
         return false;
     }
@@ -496,27 +535,32 @@ class Document extends BaseModel
             'id' => $patient_id,
             'with_documents' => true,
         ];
-        if($requestedData = Yii::$app->api->getPatient($params)) {
-            $data = ApiHelper::getDataFromApi($requestedData);
-            $data['patient_name'] = $data['last_name'].' '.$data['first_name'].' '.$data['third_name'];
-            $data['patient_address'] = ($data['address'] and isset($data['address']['fullAddress'])) ? $data['address']['fullAddress'] : '';
-            $data['patient_birthdate'] = $data['birth_date'];
-            $data['patient_number'] = $data['number'];
-            $data['patient_email'] = $data['email'];
-            $data['patient_phone'] = $data['mobile'];
-            $data['patient_passport'] = ($data['documents'] and $data['documents']['passport']) ? $data['documents']['passport'] : '';
-            $data['patient_insurance'] = ($data['documents'] and $data['documents']['insurance']) ? $data['documents']['insurance'] : '';
-            $data['patient_cert'] = ($data['documents'] and $data['documents']['cert']) ? $data['documents']['cert'] : '';
-            $data['patient_address_legal'] = ($data['address'] and $data['address']['fullAddress']) ? $data['address']['fullAddress'] : '';
-            $data['patient_fact_address'] = ($data['address'] and $data['address']['fullAddress']) ? $data['address']['fullAddress'] : '';
-            $data['representative_name'] = '';
-            $data['representative_address'] = '';
-            $data['representative_birthdate'] = '';
-            $data['representative_email'] = '';
-            $data['representative_phone'] = '';
-            $data['representative_passport'] = '';
 
-            if($parent_id = $data['parent_id']) {
+        if($requestedData = Yii::$app->api->getPatient($params)) {
+            $this->patient = ApiHelper::getDataFromApi($requestedData);
+            $this->patient['patient_name'] = $this->patient['last_name'].' '.$this->patient['first_name'].' '.$this->patient['third_name'];
+            $this->patient['patient_address'] = ($this->patient['address'] and isset($this->patient['address']['fullAddress'])) ? $this->patient['address']['fullAddress'] : '';
+            $this->patient['patient_birthdate'] = $this->patient['birth_date'];
+            $this->patient['patient_number'] = $this->patient['number'];
+            $this->patient['patient_email'] = $this->patient['email'];
+            $this->patient['patient_phone'] = $this->patient['mobile'];
+            $this->patient['patient_passport'] = ($this->patient['documents'] and $this->patient['documents']['passport']) ? $this->patient['documents']['passport'] : '';
+            $this->patient['patient_insurance'] = ($this->patient['documents'] and $this->patient['documents']['insurance']) ? $this->patient['documents']['insurance'] : '';
+            $this->patient['patient_cert'] = ($this->patient['documents'] and $this->patient['documents']['cert']) ? $this->patient['documents']['cert'] : '';
+            $this->patient['patient_address_legal'] = ($this->patient['address'] and $this->patient['address']['fullAddress']) ? $this->patient['address']['fullAddress'] : '';
+            $this->patient['patient_fact_address'] = ($this->patient['address'] and $this->patient['address']['fullAddress']) ? $this->patient['address']['fullAddress'] : '';
+            $this->patient['representative_name'] = '';
+            $this->patient['representative_address'] = '';
+            $this->patient['representative_birthdate'] = '';
+            $this->patient['representative_email'] = '';
+            $this->patient['representative_phone'] = '';
+            $this->patient['representative_passport'] = '';
+
+            $this->patient['patient_name_short'] = $this->getPatientNameShort();
+            $this->patient['foreigner_last_name_passport'] = $this->getForeignerPassportAttribute('last_name');
+            $this->patient['foreigner_first_passport'] = $this->getForeignerPassportAttribute('first_name');
+
+            if($parent_id = $this->patient['parent_id']) {
                 sleep(1);
                 $params = [
                     'id' => $parent_id,
@@ -524,19 +568,51 @@ class Document extends BaseModel
                 ];
                 if($representativeData = Yii::$app->api->getPatient($params)) {
                     if($representativeData = ApiHelper::getDataFromApi($representativeData)) {
-                        $data['representative_name'] = $representativeData['last_name'].' '.$representativeData['first_name'].' '.$representativeData['third_name'];
-                        $data['representative_address'] = ($representativeData['address'] and isset($representativeData['address']['fullAddress'])) ? $representativeData['address']['fullAddress'] : '';
-                        $data['representative_birthdate'] = $representativeData['birth_date'];
-                        $data['representative_email'] = $representativeData['email'];
-                        $data['representative_phone'] = $representativeData['mobile'];
-                        $data['representative_passport'] = ($representativeData['documents'] and $representativeData['documents']['passport']) ? $representativeData['documents']['passport'] : '';
+                        $this->patient['representative_name'] = $representativeData['last_name'].' '.$representativeData['first_name'].' '.$representativeData['third_name'];
+                        $this->patient['representative_address'] = ($representativeData['address'] and isset($representativeData['address']['fullAddress'])) ? $representativeData['address']['fullAddress'] : '';
+                        $this->patient['representative_birthdate'] = $representativeData['birth_date'];
+                        $this->patient['representative_email'] = $representativeData['email'];
+                        $this->patient['representative_phone'] = $representativeData['mobile'];
+                        $this->patient['representative_passport'] = ($representativeData['documents'] and $representativeData['documents']['passport']) ? $representativeData['documents']['passport'] : '';
+                        $this->patient['representative_name_short'] = $this->getPatientNameShort($representativeData);
                     }
                 }
             }
-            return $data;
+            return $this->patient;
         }
         return false;
     }
+
+    public function getPatientNameShort($patient = null)
+    {
+        if($patient === null) $patient = $this->patient;
+
+        $f = mb_substr($patient['first_name'] ?? '', 0, 1, 'UTF-8');
+        $t = mb_substr($patient['third_name'] ?? '', 0, 1, 'UTF-8');
+
+        $name = $patient['last_name'] ?? '';
+
+        if (!empty($f)) {
+            $name .= " {$f}.";
+        }
+        if (!empty($t)) {
+            $name .= "{$t}.";
+        }
+
+        return $name;
+    }
+
+    public function getForeignerPassportAttribute($attribute = null)
+    {
+        if (!empty($this->patient['is_foreign_document']) && !empty($this->patient[$attribute])) {
+            return isset($this->patient['documents']['passport']) ? $this->patient[$attribute] . ' ' . $this->patient['documents']['passport'] : $this->patient[$attribute];
+        }
+
+        return null;
+    }
+
+
+
 
     public function getCompany()
     {

@@ -81,9 +81,9 @@ class DocumentController extends BaseController
                 $model->addDocumentError('Пациент не найден');
             }
 
-            //\Yii::$app->infoLog->add('appointments', $appointments, '__appointments-log.txt');
-            //\Yii::$app->infoLog->add('clinic', $clinic, '__clinic-log.txt');
-            //\Yii::$app->infoLog->add('patient', $patient, '__patient-log.txt');
+//            \Yii::$app->infoLog->add('appointments', $appointments, '__appointments-log.txt');
+//            \Yii::$app->infoLog->add('clinic', $clinic, '__clinic-log.txt');
+//            \Yii::$app->infoLog->add('patient', $patient, '__patient-log.txt');
 
             if($appointments and $clinic and $patient) {
                 $model->setAvaliablePatterns();

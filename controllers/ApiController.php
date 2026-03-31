@@ -128,7 +128,7 @@ class ApiController extends Controller
 //         if($this->api->hasErrors()) {
 //             \Yii::$app->infoLog->add('error_message', $this->api->result['error_message'], 'api-logs.txt');
 //         }
-        \Yii::$app->infoLog->add('result', $this->api->result, 'signatures-log.txt');
+        //\Yii::$app->infoLog->add('result', $this->api->result, 'signatures-log.txt');
         return $this->api->result;
     }
 
