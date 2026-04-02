@@ -34,21 +34,18 @@ class AjaxController extends Controller
     {
         if(!$appointment_id = Yii::$app->request->post('appointment_id')) return $this->res;
         $model = new Document(['appointment_id' => $appointment_id]);
-        $appointment = $model->getAppointment();
+        $appointment = $model->getAppointment(false);
         if(!$appointment) {
             $this->res['message'] = $model->getAppointmentErrorMessage();
             return $this->res;
         }
-        if($appointment) {
-            $patient_id = $appointment['patient_id'];
-            if($patient = $model->getPatient($patient_id)) {
-                $patientName = $patient['patient_name'];
-                $patientBirthDate = $patient['patient_birthdate'];
-                $patientMessage = $patientName.', '.$patientBirthDate.' г.р.';
-                $this->res['html'] = $model->getAppointmentSuccessMessage($patientMessage);
-                $this->res['result'] = 1;
-                return $this->res;
-            }
+        if($patient = $model->getPatient(false)) {
+            $patientName = $patient['patient_name'];
+            $patientBirthDate = $patient['patient_birthdate'];
+            $patientMessage = $patientName.', '.$patientBirthDate.' г.р.';
+            $this->res['html'] = $model->getAppointmentSuccessMessage($patientMessage);
+            $this->res['result'] = 1;
+            return $this->res;
         }
         $this->res['message'] = $model->getAppointmentErrorMessage();
         return $this->res;

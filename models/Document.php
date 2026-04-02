@@ -4,6 +4,10 @@ namespace app\models;
 
 use app\components\ApiHelper;
 use app\components\Helpers;
+use app\models\traits\AppointmentTrait;
+use app\models\traits\ClinicTrait;
+use app\models\traits\CustomFieldsTrait;
+use app\models\traits\PatientTrait;
 use kartik\mpdf\Pdf;
 use Yii;
 use yii\base\Model;
@@ -13,6 +17,11 @@ use yii\helpers\Html;
 
 class Document extends BaseModel
 {
+    use ClinicTrait;
+    use PatientTrait;
+    use AppointmentTrait;
+    use CustomFieldsTrait;
+
     const SIGNATURE_WIDTH = 300;
 
     const FILE_PATH = 'pdf/template.pdf';
@@ -25,7 +34,13 @@ class Document extends BaseModel
 
     public $documentErrors = [];
 
-    public $_patient;
+    public $clinics;
+    public $clinic;
+    public $appointment;
+
+    public $patient;
+    public $representative;
+
 
     /**
      * {@inheritdoc}
@@ -288,8 +303,9 @@ class Document extends BaseModel
         return $data;
     }
 
-    public function getServicesNoPriceFromData($items)
+    public function getServicesNoPriceFromData()
     {
+        $items = $this->appointment;
         $str = '';
         if(isset($items['services']) and $items['services']) {
             $str .= '<ul>';
@@ -301,8 +317,9 @@ class Document extends BaseModel
         return $str;
     }
 
-    public function getServicesListFromData($items)
+    public function getServicesListFromData()
     {
+        $items = $this->appointment;
         $str = '';
         $count = 1;
         $totalQty = 0;
@@ -347,8 +364,9 @@ class Document extends BaseModel
         return $str;
     }
 
-    public function getServicesListDayFromData($items)
+    public function getServicesListDayFromData()
     {
+        $items = $this->appointment;
         $str = '';
         $count = 1;
         $totalQty = 0;
@@ -394,8 +412,9 @@ class Document extends BaseModel
         return $str;
     }
 
-    public function getPriceFullFromData($items)
+    public function getPriceFullFromData()
     {
+        $items = $this->appointment;
         $servicePrice = 0;
         if(isset($items['services']) and $items['services']) {
             foreach($items['services'] as $itemService) {
@@ -437,168 +456,41 @@ class Document extends BaseModel
         return Yii::$app->api->getClinics();
     }
 
-    public function getClinic($clinic_id)
+    public function getClinic()
     {
-        if($requestedData = Yii::$app->api->getClinics()) {
-            if($data = ApiHelper::getDataFromApi($requestedData)) {
-                foreach($data as $clinic) {
-                    if($clinic['id'] == $clinic_id) {
-                        $clinic['clinic_email'] = $clinic['email'];
-                        $clinic['clinic_phone'] = $clinic['phone'];
-                        $clinic['clinic_site'] = $clinic['site'];
-                        $clinic['clinic_bic'] = $clinic['bic'];
-                        $clinic['clinic_bank'] = $clinic['bank'];
-                        $clinic['clinic_cor_account'] = $clinic['cor_account'];
-                        $clinic['clinic_account'] = $clinic['account'];
-                        return $clinic;
-                    }
-                }
-            }
-        }
-        return false;
+        $this->setClinic();
+
+        return $this->clinic;
     }
-
-    /**
-     * Используется разово - посмотреть id визитов
-     */
-    /*public function getAppointments()
-    {
-        $params = [
-            'date_created_from' => '01.09.2023 08:00',
-            'date_created_to' => '05.09.2023 08:00',
-        ];
-
-        if($response = $this->api->getAppointments($params)) {
-            return $this->getResponseAsArray($response);
-        }
-        return false;
-    }*/
 
     /**
      * получить визит по его id
      */
-    public function getAppointment()
+    public function getAppointment($custom = true)
     {
-        $params = [
-            'appointment_id' => $this->appointment_id,
-        ];
-        if($requestedData = Yii::$app->api->getAppointments($params)) {
-            $result = null;
-            if($data = ApiHelper::getDataFromApi($requestedData)) {
-                if(isset($data[0])) {
-                    $result = $data[0];
-                    $result['visit_date'] = isset($result['time_start']) ? date('d.m.Y', strtotime($result['time_start']))  : '';
-                    $result['time_from'] = isset($result['time_start']) ? date('H:i', strtotime($result['time_start']))  : '';
-                    $result['services_no_price'] = $this->getServicesNoPriceFromData($result);
-                    $result['service_list'] = $this->getServicesListFromData($result);
-                    $result['service_list_day'] = $this->getServicesListDayFromData($result);
-                    $result['price_full'] = $this->getPriceFullFromData($result);
-                    $result['user_name_short'] = $result['author_name'];
-                }
-            }
-            return $result;
+        $this->setAppointment();
+        if($custom) {
+            $this->setAppointmentCustom();
         }
-        return false;
+        return $this->appointment;
     }
 
     /**
      * получить пациента по его id
      */
-    public function getPatient($patient_id)
+    public function getPatient($representative = true)
     {
-        $this->patient_id = $patient_id;
-        $params = [
-            'id' => $patient_id,
-            'with_documents' => true,
-        ];
-        if($requestedData = Yii::$app->api->getPatient($params)) {
-            $data = ApiHelper::getDataFromApi($requestedData);
-            $data['patient_name'] = $data['last_name'].' '.$data['first_name'].' '.$data['third_name'];
-            $data['patient_address'] = ($data['address'] and isset($data['address']['fullAddress'])) ? $data['address']['fullAddress'] : '';
-            $data['patient_birthdate'] = $data['birth_date'];
-            $data['patient_number'] = $data['number'];
-            $data['patient_email'] = $data['email'];
-            $data['patient_phone'] = $data['mobile'];
-            $data['patient_passport'] = ($data['documents'] and $data['documents']['passport']) ? $data['documents']['passport'] : '';
-            $data['patient_insurance'] = ($data['documents'] and $data['documents']['insurance']) ? $data['documents']['insurance'] : '';
-            $data['patient_cert'] = ($data['documents'] and $data['documents']['cert']) ? $data['documents']['cert'] : '';
-            $data['patient_address_legal'] = ($data['address'] and $data['address']['fullAddress']) ? $data['address']['fullAddress'] : '';
-            $data['patient_fact_address'] = ($data['address'] and $data['address']['fullAddress']) ? $data['address']['fullAddress'] : '';
-            $data['representative_name'] = '';
-            $data['representative_address'] = '';
-            $data['representative_birthdate'] = '';
-            $data['representative_email'] = '';
-            $data['representative_phone'] = '';
-            $data['representative_passport'] = '';
+        $this->patient_id = $this->appointment['patient_id'] ?? null;
+        $this->setPatient();
+        $this->setPatientCustom();
 
-            if($parent_id = $data['parent_id']) {
-                sleep(1);
-                $params = [
-                    'id' => $parent_id,
-                    'with_documents' => true,
-                ];
-                if($representativeData = Yii::$app->api->getPatient($params)) {
-                    if($representativeData = ApiHelper::getDataFromApi($representativeData)) {
-                        $data['representative_name'] = $representativeData['last_name'].' '.$representativeData['first_name'].' '.$representativeData['third_name'];
-                        $data['representative_address'] = ($representativeData['address'] and isset($representativeData['address']['fullAddress'])) ? $representativeData['address']['fullAddress'] : '';
-                        $data['representative_birthdate'] = $representativeData['birth_date'];
-                        $data['representative_email'] = $representativeData['email'];
-                        $data['representative_phone'] = $representativeData['mobile'];
-                        $data['representative_passport'] = ($representativeData['documents'] and $representativeData['documents']['passport']) ? $representativeData['documents']['passport'] : '';
-                    }
-                }
-            }
-            $this->_patient = $data;
-            $this->patient_email = $data['patient_email'];
-            return $this->_patient;
+        if($representative) {
+            $this->setRepresentative();
+            $this->setRepresentativeCustom();
         }
-        return false;
-    }
 
-    public function getCompany()
-    {
-        $this->patient_id = $patient_id;
-        $params = [
-            'id' => $patient_id,
-            'with_documents' => true,
-        ];
-        if($requestedData = Yii::$app->api->getPatient($params)) {
-            $data = ApiHelper::getDataFromApi($requestedData);
-            $data['patient_name'] = $data['last_name'].' '.$data['first_name'].' '.$data['third_name'];
-            $data['patient_address'] = ($data['address'] and isset($data['address']['fullAddress'])) ? $data['address']['fullAddress'] : '';
-            $data['patient_birthdate'] = $data['birth_date'];
-            $data['patient_number'] = $data['number'];
-            $data['patient_email'] = $data['email'];
-            $data['patient_phone'] = $data['mobile'];
-            $data['patient_passport'] = ($data['documents'] and $data['documents']['passport']) ? $data['documents']['passport'] : '';
-            $data['patient_insurance'] = ($data['documents'] and $data['documents']['insurance']) ? $data['documents']['insurance'] : '';
-            $data['patient_address_legal'] = ($data['address'] and $data['address']['fullAddress']) ? $data['address']['fullAddress'] : '';
-            $data['representative_name'] = '';
-            $data['representative_address'] = '';
-            $data['representative_birthdate'] = '';
-            $data['representative_email'] = '';
-            $data['representative_phone'] = '';
-            $data['representative_passport'] = '';
-
-            if($parent_id = $data['parent_id']) {
-                $params = [
-                    'id' => $parent_id,
-                ];
-                if($responseRequestedRepresentative = Yii::$app->api->getPatient($params)) {
-                    $representativeData = ApiHelper::getDataFromApi($responseRequestedRepresentative);
-                    if($representativeData and isset($representativeData['data']) and $representativeData['data']) {
-                        $data['representative_name'] = $representativeData['last_name'].' '.$representativeData['first_name'].' '.$representativeData['third_name'];
-                        $data['representative_address'] = ($representativeData['address'] and isset($representativeData['address']['fullAddress'])) ? $representativeData['address']['fullAddress'] : '';
-                        $data['representative_birthdate'] = $representativeData['birth_date'];
-                        $data['representative_email'] = $representativeData['email'];
-                        $data['representative_phone'] = $representativeData['mobile'];
-                        $data['representative_passport'] = ($representativeData['documents'] and $representativeData['documents']['passport']) ? $representativeData['documents']['passport'] : '';
-                    }
-                }
-            }
-            return $data;
-        }
-        return false;
+        $this->patient_email = $this->patient['patient_email'] ?? null;
+        return $this->patient;
     }
 
     public function addDocumentError($message = '')
@@ -713,7 +605,7 @@ class Document extends BaseModel
             return true;
         }
         catch(\Exception $e) {
-            \Yii::$app->session->setFlash('error', "Не удалось создать документ");
+            \Yii::$app->session->setFlash('error', "Не удалось создать документ. Ошибка разметки шаблона");
             return false;
         }
     }

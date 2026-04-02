@@ -63,13 +63,14 @@ class DocumentController extends BaseController
 
             $clinic = null;
             $patient = null;
+
             $appointments = $model->getAppointment();
 
-            if($appointments and isset($appointments['clinic_id'])) {
-                $clinic = $model->getClinic($appointments['clinic_id']);
+            if($appointments) {
+                $clinic = $model->getClinic();
             }
-            if($appointments and isset($appointments['patient_id'])) {
-                $patient = $model->getPatient($appointments['patient_id']);
+            if($appointments) {
+                $patient = $model->getPatient();
             }
             if(!$appointments) {
                 $model->addDocumentError('Визит '.$model->appointment_id.' не найден');
@@ -81,9 +82,11 @@ class DocumentController extends BaseController
                 $model->addDocumentError('Пациент не найден');
             }
 
-            //\Yii::$app->infoLog->add('appointments', $appointments, '__appointments-log.txt');
-            //\Yii::$app->infoLog->add('clinic', $clinic, '__clinic-log.txt');
-            //\Yii::$app->infoLog->add('patient', $patient, '__patient-log.txt');
+            $model->setCustomFields();
+
+//            \Yii::$app->infoLog->add('appointments', $appointments, '__appointments-log.txt');
+//            \Yii::$app->infoLog->add('clinic', $clinic, '__clinic-log.txt');
+//            \Yii::$app->infoLog->add('patient', $patient, '__patient-log.txt');
 
             if($appointments and $clinic and $patient) {
                 $model->setAvaliablePatterns();
@@ -99,9 +102,10 @@ class DocumentController extends BaseController
                         $model->cancelDocuments();
                         $btn = Html::a('Скачать', ['document/download', 'id' => $model->id], ['class' => 'btn btn-sm btn-primary', 'target' => '_blanc']);
                         if($model->hasCustomParams()) {
-                            $btn .= Html::a('Заполнить параметры', ['document/update', 'id' => $model->id], ['class' => 'btn btn-sm btn-warning', 'style' => 'v']);
+                            $btn .= Html::a('Заполнить параметры', ['document/update', 'id' => $model->id], ['class' => 'btn btn-sm btn-warning', 'style' => 'margin-left: 10px;']);
                         }
                         if(!\Yii::$app->session->hasFlash('error')) {
+                            $btn .= Html::a('Подписать', ['tablet/' . $model->tablet->id], ['class' => 'btn btn-sm btn-success', 'style' => 'margin-left: 10px;', 'target' => '_blanc' ]);
                             Yii::$app->session->setFlash('success', 'Документ успешно отправлен на планшет '.$btn);
                         }
                     }

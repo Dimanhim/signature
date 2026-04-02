@@ -13,8 +13,8 @@
                             <input type="text" placeholder="Поле ввода" x-model="textCustomField">
                         </div>
                         <div class="modal__btns">
-                            <button class="btn" type="button" @click="saveText">Сохранить</button>
-                            <button class="btn btn--dark" type="button" @click="clearText">Очистить</button>
+                            <button class="btn" type="button" @click="clearText">Очистить</button>
+                            <button class="btn btn--dark" type="button" @click="saveText">Сохранить</button>
                         </div>
                     </div>
                 </div>
