@@ -178,6 +178,7 @@ class Template extends BaseModel
                 'patient_fact_address' => 'домашний_адрес_пациента',
             ],
             'Визиты' => [
+                'appointment_id' => '№_визита',
                 'room' => 'кабинет',
                 'doctor' => 'фио_врача',
 

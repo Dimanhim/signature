@@ -1,0 +1,11 @@
+DB_HOST             =""
+DB_NAME             =""
+DB_USERNAME         =""
+DB_PASSWORD         =""
+DB_TABLE_PREFIX     =""
+
+SMTP_HOST           =""
+SMTP_USERNAME       =""
+SMTP_PASSWORD       =""
+SMTP_PORT           =""
+SMTP_ENCRYPTION     =""

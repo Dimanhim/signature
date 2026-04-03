@@ -2,7 +2,7 @@
 
     composer install
     
-2. в файле config/db.php указываем доступы к базе данных и префикс таблиц
+2. создаем файл .env, копируем в него содержимое .env.example и прописываем данные доступа к БД и SMTP
 3. Выполнить команду
 
     php yii migrate --migrationPath=@yii/rbac/migrations

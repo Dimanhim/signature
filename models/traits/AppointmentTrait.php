@@ -30,6 +30,7 @@ trait AppointmentTrait
     public function setAppointmentCustom()
     {
         if($this->appointment) {
+            $this->appointment['appointment_id'] = $this->appointment['id'] ?? null;
             $this->appointment['visit_date'] = isset($this->appointment['time_start']) ? date('d.m.Y', strtotime($this->appointment['time_start']))  : '';
             $this->appointment['time_from'] = isset($this->appointment['time_start']) ? date('H:i', strtotime($this->appointment['time_start']))  : '';
             $this->appointment['services_no_price'] = $this->getServicesNoPriceFromData();

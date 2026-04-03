@@ -39,7 +39,8 @@
       "vova07/yii2-select2-widget": "^0.1.2",
       "hail812/yii2-adminlte3": "~1.1",
       "kartik-v/yii2-field-range": "*",
-      "cleantalk/php-antispam": "dev-master"
+      "cleantalk/php-antispam": "dev-master",
+        "vlucas/phpdotenv": "^5.6@dev"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
