@@ -45,6 +45,9 @@ class TemplateSearch extends Template
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => [
+                'pageSize' => 50,
+            ]
         ]);
 
         $this->load($params);

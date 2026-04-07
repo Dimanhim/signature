@@ -52,7 +52,18 @@ $templateId = $model->id;
             <div class="card">
                 <div class="card-body">
                     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
-                    <?= $form->field($model, 'is_active')->checkbox(['label' => Html::tag('span','Активность'), 'labelOptions' => ['class' => 'ui-checkbox']]) ?>
+
+                    <div class="d-flex align-items-center" style="gap: 20px;">
+                        <?= $form->field($model, 'is_active')->checkbox([
+                                'label' => Html::tag('span','Активность'),
+                                'labelOptions' => ['class' => 'ui-checkbox']
+                        ]) ?>
+
+                        <?= $form->field($model, 'payment_option')->checkbox([
+                                'label' => Html::tag('span','Возможность оплаты'),
+                                'labelOptions' => ['class' => 'ui-checkbox']
+                        ]) ?>
+                    </div>
                     <?= $form->field($model, 'clinic_ids')->dropDownList(
                         Api::getClinicsList(),
                         [

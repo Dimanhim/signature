@@ -829,11 +829,13 @@ class Document extends BaseModel
         return [
             'document_id' => $this->id,
             'tablet_id' => $this->tablet_id,
+            'appointment_id' => $this->appointment_id,
             'patient_name' => $this->patient_name,
             'patient_birthday' => $this->patient_birthday,
             'patient_id' => $this->patient_id,
             //'patient_email' => $this->patient_email,
             'content' => $this->content,
+            'payment_option' => $this->template->payment_option ?? 0,
             'custom_params' => $this->getCustomParams(),
         ];
     }

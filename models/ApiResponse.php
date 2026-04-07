@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\ApiHelper;
 use app\models\Document;
 use app\models\Setting;
 use Yii;
@@ -16,6 +17,9 @@ class ApiResponse
         'error_message' => null,
         'message' => null,
         'data' => [],
+        'appointment' => [],
+        'invoices' => [],
+        'qr_link' => null,
     ];
 
     public function getDocuments()
@@ -43,6 +47,38 @@ class ApiResponse
         if($data) {
             $this->result['data'] = $data;
         }
+
+        $this->getAppointment();
+        $this->getInvoices();
+    }
+
+    public function getAppointment()
+    {
+        $appointmentId = $this->result['data'][0]['appointment_id'] ?? null;
+
+        if(!$appointmentId) return false;
+
+        $response = Yii::$app->api->getAppointments(['appointment_id' => $appointmentId]);
+
+        $data = ApiHelper::getDataFromApi($response);
+
+        $this->result['appointment'] = $data[0] ?? null;
+    }
+
+    public function getInvoices()
+    {
+        $services = $this->result['appointment']['services'] ?? null;
+        if(!$services) return false;
+
+        $invoiceNumbers = [];
+
+        foreach($services as $service) {
+            $invoiceNumbers[] = $service['invoice_number'] ?? null;
+        }
+
+        $invoices = Yii::$app->api->getInvoices(['number' => $invoiceNumbers]);
+
+        $this->result['invoices'] = ApiHelper::getDataFromApi($invoices) ?: [];
     }
 
     public function cancelDocument()
