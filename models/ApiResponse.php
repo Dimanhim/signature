@@ -20,6 +20,7 @@ class ApiResponse
         'appointment' => [],
         'invoices' => [],
         'qr_link' => null,
+        'is_payed' => 0,
     ];
 
     public function getDocuments()
@@ -71,14 +72,24 @@ class ApiResponse
         if(!$services) return false;
 
         $invoiceNumbers = [];
-
         foreach($services as $service) {
             $invoiceNumbers[] = $service['invoice_number'] ?? null;
         }
 
         $invoices = Yii::$app->api->getInvoices(['number' => $invoiceNumbers]);
+        $allInvoices = ApiHelper::getDataFromApi($invoices) ?: [];
 
-        $this->result['invoices'] = ApiHelper::getDataFromApi($invoices) ?: [];
+        // НОРМАЛИЗАЦИЯ: если пришел один счет как объект, оборачиваем его в массив
+        $invoicesList = (isset($allInvoices['number'])) ? [$allInvoices] : $allInvoices;
+
+        $unpaid = [];
+        foreach ($invoicesList as $inv) {
+            if (isset($inv['status_code']) && (int)$inv['status_code'] !== 2) {
+                $unpaid[] = $inv;
+            }
+        }
+
+        $this->result['invoices'] = $unpaid;
     }
 
     public function cancelDocument()

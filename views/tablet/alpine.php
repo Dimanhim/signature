@@ -90,13 +90,17 @@ use yii\helpers\Url;
                 let data = await response.json();
                 if(data.error == 0) return data.data;
             },
-            async loadResponse(method, params) {
-                this.loaderOn();
+            async loadResponse(method, params, showLoader = true) {
+                if (showLoader) this.loaderOn();
                 const response = await fetch(this.apiUrl + method, {
                     method: 'POST',
                     body: params
                 });
-                return await response.json();
+
+                const data = await response.json();
+                if (showLoader) this.loaderOff();
+
+                return data;
             },
 
             async loadDataJson(method, params) {
@@ -129,27 +133,29 @@ use yii\helpers\Url;
                         this.payment_option = result.payment_option;
 
                         this.appointment = res.appointment || null;
-                        this.invoices = res.invoices || [];
+                        this.invoices = res.invoices
+                            ? (Array.isArray(res.invoices) ? res.invoices : [res.invoices])
+                            : [];
                         this.qr_link = res.qr_link || null;
 
                         this.watchEffect();
 
                         this.setSimplebar();
-                        if(this.content.length) {
-                            this.setTemplate('document')
+
+
+
+
+                        // ПРОВЕРКА: Если меток нет И включена оплата
+                        const hasInteractions = (this.total_signatures + this.total_custom) > 0;
+
+                        if (this.payment_option == 1 && !hasInteractions) {
+                            this.handlePayment();
+                        } else if (this.content.length) {
+                            this.setTemplate('document');
                         }
 
-                        // if (this.tabletId == 50 && this.payment_option == 1) {
-                        //     this.setTemplate('qr');
-                        //     this.$nextTick(() => {
-                        //         this.generateQr();
-                        //     });
-                        // }
-
-                        // if (this.tabletId == 50 && this.payment_option == 1) {
-                        //     this.qr_message = 'Найдено несколько неоплаченных счетов!';
-                        //     this.setTemplate('qr_messages');
-                        // }
+                        console.log('appointment', this.appointment)
+                        console.log('invoices', this.invoices)
 
 
                         this.loaderOff();
@@ -164,6 +170,16 @@ use yii\helpers\Url;
                 });
             },
             sendDocument() {
+                // Если условия оплаты выполняются, уходим в логику платежа
+                if (this.checkPaymentRequired()) {
+                    this.handlePayment();
+                    return;
+                }
+
+                // Если оплата не нужна, просто отправляем документ
+                this.submitDocument();
+            },
+            submitDocument() {
                 const data = {
                     document_id: this.document_id,
                     signatures: { ...this.signatures },
@@ -171,31 +187,72 @@ use yii\helpers\Url;
                 }
 
                 this.loaderOn();
-
-                const response = this.loadDataJson('set-signatures', data)
+                const response = this.loadDataJson('set-signatures', data);
 
                 response.then((data) => {
                     let message;
-
                     if(data.error == 0) {
                         message = data.message || 'Документ успешно отправлен'
-                        notie.alert({
-                            type: 'success',
-                            text: message
-                        })
+                        notie.alert({ type: 'success', text: message })
                         this.clearDocument()
-                        this.loaderOff();
+                    } else {
+                        message = data.message || 'Ошибка при отправке данных'
+                        notie.alert({ type: 'error', text: message })
                     }
-                    else {
-                        message = data.message || 'Ошибка при отправке данных. Попробуйте ещё раз'
-                        notie.alert({
-                            type: 'error',
-                            text: message
-                        })
-                        this.clearDocument()
-                        this.loaderOff();
+                    this.loaderOff();
+                });
+            },
+
+            checkPaymentRequired() {
+                return this.payment_option == 1;
+            },
+            handlePayment() {
+                if (this.invoices.length === 0) {
+                    this.qr_message = 'Счетов для оплаты не найдено!';
+                    this.setTemplate('qr_messages');
+                    return;
+                }
+
+                if (this.invoices.length > 1) {
+                    this.qr_message = 'Найдено несколько неоплаченных счетов!';
+                    this.setTemplate('qr_messages');
+                    return;
+                }
+
+                this.getPaymentLink();
+            },
+            async getPaymentLink() {
+                this.loaderOn();
+
+                const invoice = this.invoices[0];
+
+                const params = new URLSearchParams();
+                params.set('number', invoice.number);
+                params.set('patient_id', this.patient_id);
+                params.set('appointment_id', this.appointment.id);
+                params.set('payment_mode', 'sbp');
+
+                try {
+                    const res = await this.loadResponse('get-payment-link', params);
+
+                    if (res && res.error == 0 && res.qr_link) {
+                        this.qr_link = res.qr_link;
+                        this.setTemplate('qr');
+
+                        this.$nextTick(() => {
+                            this.generateQr();
+                            this.checkPaymentStatus();
+                        });
+                    } else {
+                        this.qr_message = res.message || 'Не удалось получить ссылку на оплату';
+                        this.setTemplate('qr_messages');
                     }
-                })
+                } catch (e) {
+                    this.qr_message = 'Ошибка связи с сервером при получении платежной ссылки';
+                    this.setTemplate('qr_messages');
+                } finally {
+                    this.loaderOff();
+                }
             },
             watchEffect() {
                 this.signaturesEffect(() => {
@@ -540,6 +597,7 @@ use yii\helpers\Url;
             qr_message: '',
             appointment: [],
             invoices: [],
+            paymentPolling: null,
             generateQr() {
                 const container = document.getElementById('qr-container');
                 if (container && this.qr_link) {
@@ -553,6 +611,38 @@ use yii\helpers\Url;
                     container.append(qr.result);
                 }
             },
+            checkPaymentStatus() {
+                // Очищаем старый интервал, если он был
+                if (this.paymentPolling) clearInterval(this.paymentPolling);
+
+                this.paymentPolling = setInterval(async () => {
+                    // Если пользователь ушел с экрана QR, останавливаем опрос
+                    if (this.template !== 'qr') {
+                        clearInterval(this.paymentPolling);
+                        return;
+                    }
+
+                    const params = new URLSearchParams();
+                    params.set('number', this.invoices[0].number);
+
+                    const res = await this.loadResponse('check-payment', params, false);
+
+                    if (res && res.error == 0) {
+                        // Если статус 2 (оплачено полностью) или 1 (частично - по твоему желанию)
+                        if (res.is_payed === 2) {
+                            clearInterval(this.paymentPolling);
+                            notie.alert({ type: 'success', text: 'Оплата подтверждена!' });
+
+                            // Возвращаемся к отправке документа
+                            this.submitDocument();
+                        } else if (res.is_payed === 1) {
+                            // Можно просто вывести уведомление или обновить текст на экране
+                            console.log('Оплачено частично...');
+                        }
+                    }
+                }, 3000); // 3 секунды — оптимально для планшета
+            },
+
 
 
         }))
