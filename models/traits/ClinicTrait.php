@@ -35,6 +35,7 @@ trait ClinicTrait
 
         foreach($this->clinics as $clinic) {
             if($clinic['id'] == $clinicId) {
+                $this->clinic = $clinic;
                 $this->clinic['clinic_email'] = $clinic['email'];
                 $this->clinic['clinic_phone'] = $clinic['phone'];
                 $this->clinic['clinic_site'] = $clinic['site'];
