@@ -51,6 +51,8 @@ class ApiResponse
 
         $this->getAppointment();
         $this->getInvoices();
+
+//        \Yii::$app->infoLog->add('result', $this->result);
     }
 
     public function getAppointment()
@@ -76,7 +78,7 @@ class ApiResponse
             $invoiceNumbers[] = $service['invoice_number'] ?? null;
         }
 
-        $invoices = Yii::$app->api->getInvoices(['number' => $invoiceNumbers]);
+        $invoices = Yii::$app->api->getInvoices(['number' => $invoiceNumbers, 'date_from' => '01.01.2000', 'date_to' => '01.01.2050']);
         $allInvoices = ApiHelper::getDataFromApi($invoices) ?: [];
 
         // НОРМАЛИЗАЦИЯ: если пришел один счет как объект, оборачиваем его в массив

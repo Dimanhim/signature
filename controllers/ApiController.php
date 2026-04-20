@@ -111,8 +111,32 @@ class ApiController extends Controller
         $appointmentId = $params['appointment_id'] ?? null;
         $paymentMode = $params['payment_mode'] ?? null;
 
+        \Yii::$app->infoLog->add('actionGetPaymentLink params', $params);
+
         if ($number && $patientId && $appointmentId && $paymentMode) {
 
+            // 1. ПРОВЕРКА НА ДУБЛИКАТ:
+            // Ищем существующую запись по счету и визиту, которая еще не оплачена
+            $payment = Payment::find()
+                ->where([
+                    'appointment_id' => $appointmentId,
+                    'invoice_number' => (string)$number,
+                ])
+                ->orderBy(['id' => SORT_DESC])
+                ->one();
+
+            if ($payment) {
+                if ($payment->is_payed == 2) {
+                    // Если уже оплачено, просто говорим фронту — платить не надо
+                    $this->api->addError('Счет уже оплачен');
+                    return $this->responseValue();
+                }
+                // Если висит неоплаченный (0 или 1), отдаем старую ссылку
+                $this->api->result['qr_link'] = $payment->payment_link;
+                return $this->responseValue();
+            }
+
+            // 3. Если записи нет — запрашиваем новую ссылку у МИС
             $request = Yii::$app->api->getPaymentLink([
                 'number' => $number,
                 'patient_id' => $patientId,
@@ -139,6 +163,8 @@ class ApiController extends Controller
                 }
             }
 
+            \Yii::$app->infoLog->add('qr_link', $this->api->result['qr_link']);
+
             $this->api->addError('Не удалось получить ссылку от платежного сервиса');
             return $this->responseValue();
         }
@@ -153,6 +179,7 @@ class ApiController extends Controller
      */
     public function actionPayment($key)
     {
+        return;
         \Yii::$app->infoLog->add('RAW_BODY', Yii::$app->request->getRawBody(), date('Y-m-d').'-payment-hook.txt');
         \Yii::$app->infoLog->add('GET_PARAMS', Yii::$app->request->get(), date('Y-m-d').'-payment-hook.txt');
 
@@ -214,6 +241,63 @@ class ApiController extends Controller
         return $this->responseValue();
     }
 
+    public function actionCheckPaymentStatus()
+    {
+        $params = Yii::$app->request->post() ?: Yii::$app->request->get();
+        $appointmentId = $params['appointment_id'] ?? null;
+        $invoiceNumberLocal = $params['number'] ?? null; // Номер, который у нас был изначально
+
+        if (!$appointmentId) {
+            $this->api->addError('Не указан ID визита');
+            return $this->responseValue();
+        }
+
+        // 1. Тянем ВСЕ счета за сегодня
+        $today = date('d.m.Y');
+        $response = Yii::$app->api->getInvoices([
+            'date_from' => $today,
+            'date_to' => $today
+        ]);
+
+        \Yii::$app->infoLog->add('bool response', $response, '__' . date('Y-m-d H:i:s').'-payment-check.txt');
+
+        $data = ApiHelper::getDataFromApi($response) ?: [];
+        // Нормализация в массив, если пришел один счет
+        $allInvoices = (isset($data['number'])) ? [$data] : $data;
+
+        $foundStatus = 0;
+        $realNumber = null;
+
+        // 2. Ищем нужный счет по appointment_id
+        foreach ($allInvoices as $inv) {
+            if (isset($inv['appointment_id']) && (int)$inv['appointment_id'] === (int)$appointmentId) {
+                $foundStatus = (int)($inv['status_code'] ?? 0);
+                $realNumber = (string)($inv['number'] ?? null);
+                break;
+            }
+        }
+
+        // 3. Обновляем нашу таблицу payments
+        $localPayment = Payment::find()
+            ->where(['appointment_id' => $appointmentId])
+            ->andWhere(['invoice_number' => (string)$invoiceNumberLocal])
+            ->orderBy(['id' => SORT_DESC])
+            ->one();
+
+        if ($localPayment) {
+            $localPayment->is_payed = $foundStatus;
+            if ($realNumber) {
+                $localPayment->invoice_number_real = $realNumber;
+            }
+            $localPayment->save();
+        }
+
+        $this->api->result['is_payed'] = $foundStatus;
+        return $this->responseValue();
+    }
+
+
+
 
 
 
@@ -250,7 +334,7 @@ class ApiController extends Controller
 //         if($this->api->hasErrors()) {
 //             \Yii::$app->infoLog->add('error_message', $this->api->result['error_message'], 'api-logs.txt');
 //         }
-        \Yii::$app->infoLog->add('result', $this->api->result, 'signatures-log.txt');
+        \Yii::$app->infoLog->add('result', $this->api->result, 'signatures_2-log.txt');
         return $this->api->result;
     }
 

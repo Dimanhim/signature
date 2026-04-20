@@ -35,7 +35,7 @@ class Payment extends \app\models\BaseModel
             [['appointment_id', 'invoice_number'], 'required'],
             [['appointment_id', 'patient_id', 'is_payed'], 'integer'],
             [['payment_link'], 'string'],
-            [['invoice_number'], 'string', 'max' => 255],
+            [['invoice_number', 'invoice_number_real'], 'string', 'max' => 255],
         ]);
     }
 

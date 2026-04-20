@@ -18,6 +18,7 @@ class m260407_111510_payments extends Migration
 
             'appointment_id' => Schema::TYPE_INTEGER . ' NOT NULL',
             'invoice_number' => Schema::TYPE_STRING . ' NOT NULL',
+            'invoice_number_real' => Schema::TYPE_STRING . ' AFTER invoice_number',
             'patient_id'     => Schema::TYPE_INTEGER . ' NOT NULL',
             'payment_link'   => Schema::TYPE_TEXT,
 

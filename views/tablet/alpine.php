@@ -242,6 +242,7 @@ use yii\helpers\Url;
                         this.$nextTick(() => {
                             this.generateQr();
                             this.checkPaymentStatus();
+                            this.startQrTimer();
                         });
                     } else {
                         this.qr_message = res.message || 'Не удалось получить ссылку на оплату';
@@ -589,6 +590,21 @@ use yii\helpers\Url;
                     this.loaderOff();
                 });
             },
+            cancelPayment() {
+                // 1. Останавливаем таймер опроса, чтобы он не дергал базу
+                if (this.paymentPolling) {
+                    clearInterval(this.paymentPolling);
+                    this.paymentPolling = null;
+                }
+
+                // 2. Очищаем данные документа, чтобы условия в loadDocument не срабатывали повторно
+                this.clearDocument();
+
+                // 3. Возвращаемся на главный экран
+                this.setTemplate('download');
+
+                notie.alert({ type: 'info', text: 'Оплата отменена' });
+            },
 
 
             // PAYMENT
@@ -598,6 +614,20 @@ use yii\helpers\Url;
             appointment: [],
             invoices: [],
             paymentPolling: null,
+            qr_seconds: 0,
+            qr_timer_interval: null,
+            startQrTimer() {
+                this.qr_seconds = 0;
+                if (this.qr_timer_interval) clearInterval(this.qr_timer_interval);
+
+                this.qr_timer_interval = setInterval(() => {
+                    if (this.template === 'qr') {
+                        this.qr_seconds++;
+                    } else {
+                        clearInterval(this.qr_timer_interval);
+                    }
+                }, 1000);
+            },
             generateQr() {
                 const container = document.getElementById('qr-container');
                 if (container && this.qr_link) {
@@ -612,36 +642,47 @@ use yii\helpers\Url;
                 }
             },
             checkPaymentStatus() {
-                // Очищаем старый интервал, если он был
+                // Очищаем старые интервалы, если они были
                 if (this.paymentPolling) clearInterval(this.paymentPolling);
+                if (this.qr_timer_interval) clearInterval(this.qr_timer_interval);
 
+                // 1. ВИЗУАЛЬНЫЙ ТАЙМЕР (тикает от 0 до бесконечности каждую секунду)
+                this.qr_seconds = 0;
+                this.qr_timer_interval = setInterval(() => {
+                    if (this.template === 'qr') {
+                        this.qr_seconds++;
+                    } else {
+                        clearInterval(this.qr_timer_interval);
+                    }
+                }, 1000);
+
+                // 2. ОПРОС СТАТУСА В МИС (каждые 5 секунд)
                 this.paymentPolling = setInterval(async () => {
-                    // Если пользователь ушел с экрана QR, останавливаем опрос
                     if (this.template !== 'qr') {
                         clearInterval(this.paymentPolling);
                         return;
                     }
 
+                    const invoice = this.invoices[0];
+                    if (!invoice) return;
+
                     const params = new URLSearchParams();
-                    params.set('number', this.invoices[0].number);
+                    params.set('appointment_id', this.appointment.id); // Передаем ID визита
+                    params.set('number', invoice.number);
 
-                    const res = await this.loadResponse('check-payment', params, false);
+                    // Идем в новый метод, который стучится напрямую в МИС
+                    const res = await this.loadResponse('check-payment-status', params, false);
 
-                    if (res && res.error == 0) {
-                        // Если статус 2 (оплачено полностью) или 1 (частично - по твоему желанию)
-                        if (res.is_payed === 2) {
-                            clearInterval(this.paymentPolling);
-                            notie.alert({ type: 'success', text: 'Оплата подтверждена!' });
+                    if (res && res.error == 0 && res.is_payed === 2) {
+                        clearInterval(this.paymentPolling);
+                        if (this.qr_timer_interval) clearInterval(this.qr_timer_interval);
 
-                            // Возвращаемся к отправке документа
-                            this.submitDocument();
-                        } else if (res.is_payed === 1) {
-                            // Можно просто вывести уведомление или обновить текст на экране
-                            console.log('Оплачено частично...');
-                        }
+                        notie.alert({ type: 'success', text: 'Оплата подтверждена! Документ успешно отправлен' });
+                        this.submitDocument();
                     }
-                }, 3000); // 3 секунды — оптимально для планшета
+                }, 10000); // Интервал опроса 5 секунд
             },
+
 
 
 
