@@ -381,7 +381,10 @@ use yii\helpers\Url;
             clearSignature() {
                 this.show_sign_text = true;
                 canvas.clear()
-                this.unsetCurrentSignatureId();
+                //this.unsetCurrentSignatureId();
+                if (this.currentSignatureId) {
+                    this.signatures[this.currentSignatureId] = null;
+                }
                 this.show_sign_text = true;
             },
             saveText() {
