@@ -28,19 +28,29 @@ class ApiResponse
         $params = Yii::$app->request->post() ?: Yii::$app->request->get() ;
         $tablet_id = $params['tablet_id'] ?? null;
 
+        \Yii::$app->infoLog->add('tablet_id', $tablet_id, date('Y-m-d-H') . '_documents.txt');
+
         $data = [];
         if(!$tablet_id) {
             $this->addError(self::ERROR_TABLET_EMPTY);
             return $this->result;
         }
         if(!$tablet = Tablet::findOne($tablet_id)) {
+            \Yii::$app->infoLog->add('', 'планшет не найден', date('Y-m-d-H') . '_documents.txt');
             $this->addError(self::ERROR_TABLET_NOT_FOUND);
             return $this->result;
         }
 
         if($documents = Document::findModels()->andWhere(['tablet_id' => $tablet->id])->andWhere(['canceled' => 0])->andWhere(['is_signature' => NULL])->all()) {
+            \Yii::$app->infoLog->add('найдено документов - ', count($documents), date('Y-m-d-H') . '_documents.txt');
+
             foreach($documents as $document) {
-                if(!$document->signatures) {
+
+                $sigs = $document->signatures;
+                \Yii::$app->infoLog->add('DEBUG: count sigs', ['count' => count($sigs), 'doc_id' => $document->id], date('Y-m-d-H') . '_documents.txt');
+
+                if (empty($sigs)) {
+                    \Yii::$app->infoLog->add('документ не подписан attrs', $document->attributes, date('Y-m-d-H') . '_documents.txt');
                     $data[] = $document->contentResponse();
                 }
             }
@@ -49,10 +59,12 @@ class ApiResponse
             $this->result['data'] = $data;
         }
 
+        \Yii::$app->infoLog->add('result', $this->result, date('Y-m-d-H') . '_documents.txt');
+
         $this->getAppointment();
         $this->getInvoices();
 
-//        \Yii::$app->infoLog->add('result', $this->result);
+        \Yii::$app->infoLog->add('total result', $this->result, date('Y-m-d-H') . '_documents.txt');
     }
 
     public function getAppointment()
@@ -63,6 +75,8 @@ class ApiResponse
 
         $response = Yii::$app->api->getAppointments(['appointment_id' => $appointmentId]);
 
+        \Yii::$app->infoLog->add('getAppointments appointmentId', $appointmentId, date('Y-m-d-H') . '_documents.txt');
+        \Yii::$app->infoLog->add('getAppointments response', $response, date('Y-m-d-H') . '_documents.txt');
         $data = ApiHelper::getDataFromApi($response);
 
         $this->result['appointment'] = $data[0] ?? null;
@@ -75,15 +89,25 @@ class ApiResponse
 
         $invoiceNumbers = [];
         foreach($services as $service) {
-            $invoiceNumbers[] = $service['invoice_number'] ?? null;
+            if($service['invoice_number']) {
+                $invoiceNumbers[] = $service['invoice_number'];
+            }
         }
-
+        if(!$invoiceNumbers) {
+            $this->result['invoices'] = [];
+            return false;
+        }
         $invoices = Yii::$app->api->getInvoices(['number' => $invoiceNumbers, 'date_from' => '01.01.2000', 'date_to' => '01.01.2050']);
+        \Yii::$app->infoLog->add('getInvoices response', $invoices, date('Y-m-d-H') . '_documents.txt');
         $allInvoices = ApiHelper::getDataFromApi($invoices) ?: [];
 
         // НОРМАЛИЗАЦИЯ: если пришел один счет как объект, оборачиваем его в массив
         $invoicesList = (isset($allInvoices['number'])) ? [$allInvoices] : $allInvoices;
 
+        if(!$invoicesList && !is_array($allInvoices)) {
+            $this->result['invoices'] = [];
+            return false;
+        }
         $unpaid = [];
         foreach ($invoicesList as $inv) {
             if (isset($inv['status_code']) && (int)$inv['status_code'] !== 2) {
@@ -130,6 +154,7 @@ class ApiResponse
 
     public function setContent($data)
     {
+        \Yii::$app->infoLog->add('setSignatures', '');
         // здесь отправляем емейл, если send_email установлен в true
         if(isset($data['document_id'])) {
             if(!$document = Document::findOne($data['document_id'])) {
@@ -140,18 +165,29 @@ class ApiResponse
                 $this->addError('Документ уже подписан');
                 return $this->result;
             }
+            \Yii::$app->infoLog->add('1', 'here');
             $document->setContentWithCustom($data);
+            \Yii::$app->infoLog->add('2', 'here');
             if(isset($data['signatures'])) {
+                \Yii::$app->infoLog->add('3', 'here');
                 $document->contentWithSignatures($data['signatures']);
+                \Yii::$app->infoLog->add('4', 'here');
                 $document->contentWithPatterns($data);
+                \Yii::$app->infoLog->add('5', 'here');
                 $document->generatePdf();
+                \Yii::$app->infoLog->add('6', 'here');
                 $document->uploadFile();
+                \Yii::$app->infoLog->add('7', 'here');
+                \Yii::$app->infoLog->add('getErrorsMessage', $document->getErrorsMessage());
                 if(!$document->hasDocumentErrors()) {
+                    \Yii::$app->infoLog->add('8', 'here');
                     if($document->saveSignatures($data['signatures'])) {
+                        \Yii::$app->infoLog->add('9', 'here');
                         $this->result['message'] = 'Успешно добавлено '.count($data['signatures']).' подписей, документ отправлен';
                     }
                 }
                 else {
+                    \Yii::$app->infoLog->add('10', 'here');
                     $this->addError($document->getErrorsMessage());
                 }
             }

@@ -148,7 +148,7 @@ use yii\helpers\Url;
                         // ПРОВЕРКА: Если меток нет И включена оплата
                         const hasInteractions = (this.total_signatures + this.total_custom) > 0;
 
-                        if (this.payment_option == 1 && !hasInteractions) {
+                        if (this.payment_functional && this.payment_option == 1 && !hasInteractions) {
                             this.handlePayment();
                         } else if (this.content.length) {
                             this.setTemplate('document');
@@ -171,9 +171,11 @@ use yii\helpers\Url;
             },
             sendDocument() {
                 // Если условия оплаты выполняются, уходим в логику платежа
-                if (this.checkPaymentRequired()) {
-                    this.handlePayment();
-                    return;
+                if(this.payment_functional) {
+                    if (this.checkPaymentRequired()) {
+                        this.handlePayment();
+                        return;
+                    }
                 }
 
                 // Если оплата не нужна, просто отправляем документ
@@ -471,7 +473,10 @@ use yii\helpers\Url;
             clearSignature() {
                 this.show_sign_text = true;
                 canvas.clear()
-                this.unsetCurrentSignatureId();
+                //this.unsetCurrentSignatureId();
+                if (this.currentSignatureId) {
+                    this.signatures[this.currentSignatureId] = null;
+                }
                 this.show_sign_text = true;
             },
             saveText() {
@@ -616,6 +621,7 @@ use yii\helpers\Url;
             paymentPolling: null,
             qr_seconds: 0,
             qr_timer_interval: null,
+            payment_functional: true,
             startQrTimer() {
                 this.qr_seconds = 0;
                 if (this.qr_timer_interval) clearInterval(this.qr_timer_interval);
@@ -668,6 +674,7 @@ use yii\helpers\Url;
 
                     const params = new URLSearchParams();
                     params.set('appointment_id', this.appointment.id); // Передаем ID визита
+                    params.set('patient_id', this.patient_id);
                     params.set('number', invoice.number);
 
                     // Идем в новый метод, который стучится напрямую в МИС

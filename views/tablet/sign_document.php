@@ -17,18 +17,21 @@
 
                 <div class="doc__btn">
                     <template x-if="isAllSigned">
-                        <button class="btn" type="button" @click="sendDocument">
-                            Отправить
-                        </button>
+                        <div class="d-flex" style="gap: 15px;">
+                            <button class="btn" type="button" @click="sendDocument">
+                                Отправить
+                            </button>
+                            <button class="btn btn__cancel btn--exit" type="button" @click="cancelPayment">
+                                Выход
+                            </button>
+                        </div>
                     </template>
                     <template x-if="isPartedSigned">
                         <div>
                             <button class="btn" type="button" disabled="disabled" x-html="signaturesText"></button>
                             <button class="btn btn__cancel" type="button" @click="cancelDocument">Отмена</button>
                         </div>
-
                     </template>
-
                 </div>
             </section>
         </main>
@@ -47,5 +50,15 @@
     .doc__content .btn.btn--sm {
         min-height: 62px;
         margin: 5px 0;
+    }
+    .doc__btn .btn.btn__cancel.btn--exit {
+        background-color: #f6b9d9 !important;
+        color: #e41280;               /* Неяркий текст */
+        border: 1px solid #e41280;    /* Легкая рамка */
+        box-shadow: none;          /* Убираем тень, если она есть у основных кнопок */
+    }
+
+    .doc__btn .btn.btn__cancel.btn--exit:hover {
+        background-color: #eeeeee;
     }
 </style>

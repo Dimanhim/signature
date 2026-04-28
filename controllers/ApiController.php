@@ -246,15 +246,17 @@ class ApiController extends Controller
         $params = Yii::$app->request->post() ?: Yii::$app->request->get();
         $appointmentId = $params['appointment_id'] ?? null;
         $invoiceNumberLocal = $params['number'] ?? null; // Номер, который у нас был изначально
+        $patientId = $params['patient_id'] ?? null;
 
-        if (!$appointmentId) {
-            $this->api->addError('Не указан ID визита');
+        if (!$appointmentId || !$patientId) {
+            $this->api->addError('Не указаны ID визита или пациента');
             return $this->responseValue();
         }
 
         // 1. Тянем ВСЕ счета за сегодня
         $today = date('d.m.Y');
         $response = Yii::$app->api->getInvoices([
+            'patient_id' => $patientId,
             'date_from' => $today,
             'date_to' => $today
         ]);

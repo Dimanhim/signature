@@ -637,7 +637,14 @@ class Document extends BaseModel
         $pdf->filename = 'pdf/'.$documentName;
         $this->document_name = $documentName;
         $this->save();
-        return $pdf->render();
+        try {
+            $pdf->render();
+            return true;
+        }
+        catch (\Exception $e) {
+            \Yii::$app->infoLog->add('exception error', $e->getMessage());
+            return false;
+        }
     }
 
     public function uploadFile()
@@ -704,6 +711,7 @@ class Document extends BaseModel
         // обрабатываем массив с подписями - в ключах ставим обратные скобки
         $signaturesPatterns = [];
         foreach($signatures as $signatureID => $signaturePath) {
+            if (empty($signatureID)) continue;
             $signaturesPatterns['{'.$signatureID.'}'] = $signaturePath;
         }
         return $signaturesPatterns;
