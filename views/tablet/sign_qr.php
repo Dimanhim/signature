@@ -12,13 +12,17 @@
                 </div>
             </div>
 
-            <div style="margin-top: 25px; color: #888; font-size: 20px; font-weight: 300;">
+            <div class="qr-status-info">
                 <p>Ожидание оплаты: <span x-text="qr_seconds" style="font-weight: 600; color: #333;"></span> сек.</p>
             </div>
 
-            <div class="doc__btn" style="margin-top: 60px; width: 100%; max-width: 450px;">
-                <button class="btn btn__cancel" type="button" @click="cancelPayment" style="width: 100%; height: 80px; font-size: 24px;">
+            <div class="qr-buttons-row">
+                <button class="btn btn-payment-main" type="button" @click="cancelPayment">
                     Отменить оплату
+                </button>
+
+                <button class="btn btn-payment-ghost" type="button" @click="cancelDocument">
+                    Отмена
                 </button>
             </div>
         </section>

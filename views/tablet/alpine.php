@@ -41,6 +41,7 @@ use yii\helpers\Url;
             radioCustomField: null,
 
             initService() {
+                this.initDebug();
                 if(!this.update_on_demand) {
                     this.loadDocument();
                 }
@@ -221,6 +222,12 @@ use yii\helpers\Url;
                 return this.payment_option == 1;
             },
             handlePayment() {
+                // 1. Сначала проверяем дебаг (ВСТАВИТЬ ЭТО В НАЧАЛО)
+                if (this.isDebug) {
+                    this.getPaymentLink();
+                    return;
+                }
+
                 if (this.invoices.length === 0) {
                     this.qr_message = 'Счетов для оплаты не найдено!';
                     this.setTemplate('qr_messages');
@@ -236,6 +243,20 @@ use yii\helpers\Url;
                 this.getPaymentLink();
             },
             async getPaymentLink() {
+
+                // -->
+                if (this.isDebug) {
+                    this.qr_link = 'https://qrserver.com';
+                    this.setTemplate('qr');
+                    this.$nextTick(() => {
+                        this.generateQr();
+                        this.checkPaymentStatus();
+                        this.startQrTimer();
+                    });
+                    return;
+                }
+                // <-- КОНЕЦ ВСТАВКИ
+
                 this.loaderOn();
 
                 const invoice = this.invoices[0];
@@ -688,6 +709,17 @@ use yii\helpers\Url;
                         return;
                     }
 
+                    //  -->
+                    if (this.isDebug && this.qr_seconds >= 15) {
+                        clearInterval(this.paymentPolling);
+                        if (this.qr_timer_interval) clearInterval(this.qr_timer_interval);
+                        notie.alert({ type: 'success', text: 'ТЕСТ: Оплата подтверждена!' });
+                        this.submitDocument();
+                        return;
+                    }
+                    if (this.isDebug) return;
+                    // <-- КОНЕЦ ВСТАВКИ
+
                     const invoice = this.invoices[0];
                     if (!invoice) {
                         console.error('ALFA_LOG: Инвойс не найден в массиве!');
@@ -732,6 +764,14 @@ use yii\helpers\Url;
                     }
                 }, 10000); // Интервал опроса 5 секунд
             },
+
+            // DEBUG
+            isDebug: false,
+            initDebug() {
+                this.isDebug = (new URLSearchParams(window.location.search)).has('debug');
+                if (this.isDebug) console.warn('ALFA_DEBUG: ON (имитация оплаты через 15 сек)');
+            },
+
 
 
 
