@@ -686,9 +686,9 @@ class Document extends BaseModel
                     return false;
                 }
             }
-            $this->is_signature = 1;
-            return $this->save();
         }
+        $this->is_signature = 1;
+        return $this->save();
     }
 
     public function upload()

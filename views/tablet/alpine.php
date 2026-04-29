@@ -181,29 +181,41 @@ use yii\helpers\Url;
                 // Если оплата не нужна, просто отправляем документ
                 this.submitDocument();
             },
-            submitDocument() {
+            async submitDocument() {
+                console.log('ALFA_LOG: Запуск отправки документа');
                 const data = {
                     document_id: this.document_id,
                     signatures: { ...this.signatures },
                     custom: { ...this.custom }
-                }
+                };
 
                 this.loaderOn();
-                const response = this.loadDataJson('set-signatures', data);
+                try {
+                    // Используем fetch через URLSearchParams или FormData,
+                    // но так как у нас JSON, передаем как строку
+                    const response = await fetch(this.apiUrl + 'set-signatures', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
 
-                response.then((data) => {
-                    let message;
-                    if(data.error == 0) {
-                        message = data.message || 'Документ успешно отправлен'
-                        notie.alert({ type: 'success', text: message })
-                        this.clearDocument()
+                    const res = await response.json();
+
+                    if (res.error == 0) {
+                        notie.alert({ type: 'success', text: res.message || 'Документ успешно отправлен' });
+                        this.clearDocument();
+                        this.setTemplate('download'); // Явно возвращаем на главный экран
                     } else {
-                        message = data.message || 'Ошибка при отправке данных'
-                        notie.alert({ type: 'error', text: message })
+                        notie.alert({ type: 'error', text: res.message || 'Ошибка при отправке данных' });
                     }
+                } catch (e) {
+                    console.error('ALFA_LOG: Ошибка при отправке:', e);
+                    notie.alert({ type: 'error', text: 'Критическая ошибка связи при отправке' });
+                } finally {
                     this.loaderOff();
-                });
+                }
             },
+
 
             checkPaymentRequired() {
                 return this.payment_option == 1;
@@ -648,9 +660,16 @@ use yii\helpers\Url;
                 }
             },
             checkPaymentStatus() {
-                // Очищаем старые интервалы, если они были
-                if (this.paymentPolling) clearInterval(this.paymentPolling);
-                if (this.qr_timer_interval) clearInterval(this.qr_timer_interval);
+                if (this.paymentPolling) {
+                    clearInterval(this.paymentPolling);
+                    this.paymentPolling = null;
+                }
+
+                // Также чистим визуальный таймер для порядка
+                if (this.qr_timer_interval) {
+                    clearInterval(this.qr_timer_interval);
+                    this.qr_timer_interval = null;
+                }
 
                 // 1. ВИЗУАЛЬНЫЙ ТАЙМЕР (тикает от 0 до бесконечности каждую секунду)
                 this.qr_seconds = 0;
@@ -662,7 +681,7 @@ use yii\helpers\Url;
                     }
                 }, 1000);
 
-                // 2. ОПРОС СТАТУСА В МИС (каждые 5 секунд)
+                // 2. ОПРОС СТАТУСА В МИС (каждые 10 секунд)
                 this.paymentPolling = setInterval(async () => {
                     if (this.template !== 'qr') {
                         clearInterval(this.paymentPolling);
@@ -670,22 +689,46 @@ use yii\helpers\Url;
                     }
 
                     const invoice = this.invoices[0];
-                    if (!invoice) return;
+                    if (!invoice) {
+                        console.error('ALFA_LOG: Инвойс не найден в массиве!');
+                        return;
+                    }
+
+                    console.log('ALFA_LOG: Отправка запроса. Номер счета:', invoice.number, 'Визит:', this.appointment.id);
 
                     const params = new URLSearchParams();
                     params.set('appointment_id', this.appointment.id); // Передаем ID визита
                     params.set('patient_id', this.patient_id);
                     params.set('number', invoice.number);
 
-                    // Идем в новый метод, который стучится напрямую в МИС
-                    const res = await this.loadResponse('check-payment-status', params, false);
 
-                    if (res && res.error == 0 && res.is_payed === 2) {
-                        clearInterval(this.paymentPolling);
-                        if (this.qr_timer_interval) clearInterval(this.qr_timer_interval);
 
-                        notie.alert({ type: 'success', text: 'Оплата подтверждена! Документ успешно отправлен' });
-                        this.submitDocument();
+                    try {
+                        // Оборачиваем в try/catch, чтобы сетевая ошибка не убивала таймер
+                        const res = await this.loadResponse('check-payment-status', params, false);
+
+                        console.log('ALFA_LOG: Ответ сервера:', res);
+
+                        if (res && res.error == 0) {
+                            console.log('ALFA_LOG: Получен статус is_payed:', res.is_payed, 'Тип:', typeof res.is_payed);
+
+                            if (Number(res.is_payed) === 2) {
+                                console.log('ALFA_LOG: Успех! Переходим к отправке документа.');
+                                clearInterval(this.paymentPolling);
+                                if (this.qr_timer_interval) clearInterval(this.qr_timer_interval);
+
+                                notie.alert({ type: 'success', text: 'Оплата подтверждена! Документ успешно отправлен' });
+                                this.submitDocument();
+                            } else {
+                                console.log('ALFA_LOG: Статус не равен 2, продолжаем опрос...');
+                            }
+                        } else {
+                            console.error('ALFA_LOG: Сервер вернул ошибку:', res ? res.message : 'Пустой ответ');
+                        }
+                    } catch (e) {
+                        // Если случилась ошибка сети, просто пишем в консоль.
+                        // Интервал продолжит работу и попробует снова через 10 сек.
+                        console.error('ALFA_LOG: КРИТИЧЕСКАЯ ОШИБКА (Network/JS):', e);
                     }
                 }, 10000); // Интервал опроса 5 секунд
             },

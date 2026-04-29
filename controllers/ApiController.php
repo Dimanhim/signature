@@ -67,33 +67,17 @@ class ApiController extends Controller
                 $this->api->addError('Не указан документ');
                 return false;
             }
-            if(!isset($data['signatures']) or !$data['signatures']) {
-                $this->api->addError('Не указаны подписи');
-                return false;
-            }
+//            if(!isset($data['signatures']) or !$data['signatures']) {
+//                $this->api->addError('Не указаны подписи');
+//                return false;
+//            }
             return [
                 'document_id' => $data['document_id'],
-                'signatures' => $this->getImageData($data['signatures']),
-                'custom' => $data['custom'],
+                'signatures' => isset($data['signatures']) ? $this->getImageData($data['signatures']) : [],
+                'custom' => $data['custom'] ?? [],
             ];
         }
         return false;
-
-        // TEST
-        /*
-        $signature_1 = $this->renderPartial('//document/_signature_1');
-        $signature_2 = $this->renderPartial('//document/_signature_2');
-        $signature_3 = $this->renderPartial('//document/_signature_3');
-        return [
-            'document_id' => 2,
-            'signatures' => [
-                'signature_1' => $signature_1,
-                'signature_2' => $signature_2,
-                'signature_3' => $signature_3,
-                'signature_4' => $signature_2,
-            ],
-        ];
-        */
     }
 
     public function actionGetDocuments()
@@ -248,6 +232,8 @@ class ApiController extends Controller
         $invoiceNumberLocal = $params['number'] ?? null; // Номер, который у нас был изначально
         $patientId = $params['patient_id'] ?? null;
 
+
+
         if (!$appointmentId || !$patientId) {
             $this->api->addError('Не указаны ID визита или пациента');
             return $this->responseValue();
@@ -255,20 +241,36 @@ class ApiController extends Controller
 
         // 1. Тянем ВСЕ счета за сегодня
         $today = date('d.m.Y');
+
+        \Yii::$app->infoLog->add('patient_id', $patientId, '__' . date('Y-m-d H:i:s').'-payment-check.txt');
+
+
         $response = Yii::$app->api->getInvoices([
             'patient_id' => $patientId,
-            'date_from' => $today,
-            'date_to' => $today
+            'date_from' => date('d.m.Y', strtotime('-30 days')),
+            'date_to' => date('d.m.Y', strtotime('+1 day'))
         ]);
 
         \Yii::$app->infoLog->add('bool response', $response, '__' . date('Y-m-d H:i:s').'-payment-check.txt');
 
+
         $data = ApiHelper::getDataFromApi($response) ?: [];
+
+        \Yii::$app->infoLog->add('DEBUG DATA', [
+            'data' => $data,
+        ], '__' . date('Y-m-d H:i:s').'-payment-check.txt');
+
+
         // Нормализация в массив, если пришел один счет
         $allInvoices = (isset($data['number'])) ? [$data] : $data;
 
         $foundStatus = 0;
         $realNumber = null;
+
+        \Yii::$app->infoLog->add('DEBUG ALL INVOICES', [
+            'allInvoices' => $allInvoices,
+        ], '__' . date('Y-m-d H:i:s').'-payment-check.txt');
+
 
         // 2. Ищем нужный счет по appointment_id
         foreach ($allInvoices as $inv) {
@@ -282,19 +284,33 @@ class ApiController extends Controller
         // 3. Обновляем нашу таблицу payments
         $localPayment = Payment::find()
             ->where(['appointment_id' => $appointmentId])
-            ->andWhere(['invoice_number' => (string)$invoiceNumberLocal])
+            //->andWhere(['invoice_number' => (string)$invoiceNumberLocal])
             ->orderBy(['id' => SORT_DESC])
             ->one();
+
+        \Yii::$app->infoLog->add('DEBUG local PAYMENT', [
+            '$localPayment' => $localPayment->attributes,
+        ], '__' . date('Y-m-d H:i:s').'-payment-check.txt');
 
         if ($localPayment) {
             $localPayment->is_payed = $foundStatus;
             if ($realNumber) {
                 $localPayment->invoice_number_real = $realNumber;
             }
-            $localPayment->save();
+            if (!$localPayment->save()) {
+                // Добавь этот лог, чтобы увидеть, не спотыкается ли сохранение
+                \Yii::$app->infoLog->add('SAVE_ERROR', $localPayment->getErrors(), '__' . date('Y-m-d H:i:s').'-payment-check.txt');
+            }
         }
 
+        // ЛОГ РЕЗУЛЬТАТА (поможет понять, что уходит на фронт)
+        \Yii::$app->infoLog->add('RESULT', [
+            'appointment_id' => $appointmentId,
+            'status_to_front' => $foundStatus
+        ], '__' . date('Y-m-d H:i:s').'-payment-check.txt');
+
         $this->api->result['is_payed'] = $foundStatus;
+
         return $this->responseValue();
     }
 

@@ -168,28 +168,29 @@ class ApiResponse
             \Yii::$app->infoLog->add('1', 'here');
             $document->setContentWithCustom($data);
             \Yii::$app->infoLog->add('2', 'here');
-            if(isset($data['signatures'])) {
-                \Yii::$app->infoLog->add('3', 'here');
+            \Yii::$app->infoLog->add('3', 'here');
+            if(!empty($data['signatures'])) {
                 $document->contentWithSignatures($data['signatures']);
-                \Yii::$app->infoLog->add('4', 'here');
-                $document->contentWithPatterns($data);
-                \Yii::$app->infoLog->add('5', 'here');
-                $document->generatePdf();
-                \Yii::$app->infoLog->add('6', 'here');
-                $document->uploadFile();
-                \Yii::$app->infoLog->add('7', 'here');
-                \Yii::$app->infoLog->add('getErrorsMessage', $document->getErrorsMessage());
-                if(!$document->hasDocumentErrors()) {
-                    \Yii::$app->infoLog->add('8', 'here');
-                    if($document->saveSignatures($data['signatures'])) {
-                        \Yii::$app->infoLog->add('9', 'here');
-                        $this->result['message'] = 'Успешно добавлено '.count($data['signatures']).' подписей, документ отправлен';
-                    }
+            }
+            \Yii::$app->infoLog->add('4', 'here');
+            $document->contentWithPatterns($data);
+            \Yii::$app->infoLog->add('5', 'here');
+            $document->generatePdf();
+            \Yii::$app->infoLog->add('6', 'here');
+            $document->uploadFile();
+            \Yii::$app->infoLog->add('7', 'here');
+            \Yii::$app->infoLog->add('getErrorsMessage', $document->getErrorsMessage());
+            if(!$document->hasDocumentErrors()) {
+                \Yii::$app->infoLog->add('8', 'here');
+                $documentSignatures = $data['signatures'] ?? [];
+                if($document->saveSignatures($documentSignatures)) {
+                    \Yii::$app->infoLog->add('9', 'here');
+                    $this->result['message'] = 'Успешно добавлено '.count($documentSignatures).' подписей, документ отправлен';
                 }
-                else {
-                    \Yii::$app->infoLog->add('10', 'here');
-                    $this->addError($document->getErrorsMessage());
-                }
+            }
+            else {
+                \Yii::$app->infoLog->add('10', 'here');
+                $this->addError($document->getErrorsMessage());
             }
         }
     }

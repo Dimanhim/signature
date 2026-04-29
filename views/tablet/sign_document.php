@@ -21,8 +21,8 @@
                             <button class="btn" type="button" @click="sendDocument">
                                 Отправить
                             </button>
-                            <button class="btn btn__cancel btn--exit" type="button" @click="cancelPayment">
-                                Выход
+                            <button class="btn btn__cancel btn--exit" type="button" @click="cancelDocument">
+                                Отмена
                             </button>
                         </div>
                     </template>
