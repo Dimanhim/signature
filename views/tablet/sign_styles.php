@@ -120,9 +120,9 @@ $bgGhost = getGhostBgColor($bg, 0.15);
     .btn.btn--signed {
         font-weight: 600 !important;
     }
-    .modal__btns .btn:not(.btn--ghost),
-    .doc__btn .btn:not(.btn--ghost),
-    .doc__btn .btn__cancel.btn:not(.btn--ghost)
+    .modal__btns .btn,
+    .doc__btn .btn,
+    .doc__btn .btn__cancel.btn
     {
         background: <?= $bg ?> !important;
     }
@@ -188,7 +188,9 @@ $bgGhost = getGhostBgColor($bg, 0.15);
     }
 
     /* 2. Кнопка "Отмена" (Бледная под бренд) */
-    .btn-payment-ghost {
+    .btn-payment-ghost,
+    .doc__btn .btn.btn-payment-ghost
+    {
         background: linear-gradient(0deg, <?= $bgGhost ?>, <?= $bgGhost ?>), #ffffff !important;
         color: <?= $bg ?> !important;
         border: 2px solid <?= $bg ?> !important;

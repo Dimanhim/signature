@@ -115,6 +115,8 @@ use yii\helpers\Url;
             },
 
             loadDocument() {
+                this.clearDocument();
+
                 this.loaderOn();
                 const params = new URLSearchParams();
                 params.set('tablet_id', this.tabletId);
@@ -620,6 +622,8 @@ use yii\helpers\Url;
                 const response = this.loadData('cancel-document', params)
 
                 response.then((data) => {
+                    this.clearDocument();
+
                     this.setTemplate('download')
                     notie.alert({
                         type: 'success',

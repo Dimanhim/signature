@@ -21,7 +21,7 @@
                             <button class="btn" type="button" @click="sendDocument">
                                 Отправить
                             </button>
-                            <button class="btn btn__cancel btn--exit" type="button" @click="cancelDocument">
+                            <button class="btn btn-payment-ghost" type="button" @click="cancelDocument">
                                 Отмена
                             </button>
                         </div>
@@ -29,7 +29,7 @@
                     <template x-if="isPartedSigned">
                         <div>
                             <button class="btn" type="button" disabled="disabled" x-html="signaturesText"></button>
-                            <button class="btn btn__cancel" type="button" @click="cancelDocument">Отмена</button>
+                            <button class="btn btn-payment-ghost" type="button" @click="cancelDocument">Отмена</button>
                         </div>
                     </template>
                 </div>
@@ -53,9 +53,9 @@
     }
     .doc__btn .btn.btn__cancel.btn--exit {
         background-color: #f6b9d9 !important;
-        color: #e41280;               /* Неяркий текст */
-        border: 1px solid #e41280;    /* Легкая рамка */
-        box-shadow: none;          /* Убираем тень, если она есть у основных кнопок */
+        color: #e41280;
+        border: 1px solid #e41280;
+        box-shadow: none;
     }
 
     .doc__btn .btn.btn__cancel.btn--exit:hover {
