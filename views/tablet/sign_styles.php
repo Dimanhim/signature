@@ -214,29 +214,110 @@ $bgGhost = getGhostBgColor($bg, 0.15);
 <?php
 // Определяем цвет текста для QR-экрана
 // Для Kids (3), Линии (6) и Смайл (7) ставим белый цвет, для остальных — темный
-$qrTextColor = in_array($model->clinic_id, [3, 6, 7]) ? '#ffffff' : '#333232';
+$qrTextColor = in_array($model->clinic_id, [1, 2, 4, 6, 7]) ? '#333232' : '#ffffff';
 ?>
 
 <style>
-    /* Контейнер текста ожидания */
-    .qr-status-info {
+    /* 1. Кнопка "Отменить оплату" (Темная) */
+    /* Уточняем через .doc__btn, чтобы перебить старое правило .doc__btn .btn */
+    #sign-container .doc__btn .btn.btn-payment-main,
+    #sign-container .btn-payment-main {
+        background: <?= $btnDark ?> !important;
+        color: #ffffff !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* 2. Кнопка "Отмена" (Бледная под бренд) */
+    #sign-container .doc__btn .btn.btn-payment-ghost,
+    #sign-container .btn-payment-ghost {
+        background: linear-gradient(0deg, <?= $bgGhost ?>, <?= $bgGhost ?>), #ffffff !important;
+        color: <?= $bg ?> !important;
+        border: 2px solid <?= $bg ?> !important;
+        box-shadow: none !important;
+    }
+
+    /* Ряд кнопок на экране QR */
+    #sign-container .qr-buttons-row {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+        max-width: 650px;
+        margin-top: 60px;
+        justify-content: center;
+    }
+
+    /* Убираем лишние стили, которые могут прилететь от базовых .btn */
+    #sign-container .qr-buttons-row .btn {
+        flex: 1;
+        height: 80px;
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    /* ЦВЕТА ТЕКСТА ДЛЯ ЭКРАНА QR */
+    <?php
+        $qrTextColor = in_array($model->clinic_id, [1, 2, 4, 6, 7]) ? '#333232' : '#ffffff';
+    ?>
+
+    #sign-container .qr-status-info,
+    #sign-container .qr-status-info span,
+    #sign-container .qr-header-title {
+        color: <?= $qrTextColor ?> !important;
+    }
+
+    #sign-container .qr-status-info {
         margin-top: 25px;
         font-size: 20px;
         font-weight: 300;
-        color: <?= $qrTextColor ?> !important;
     }
 
-    /* Само число секунд */
-    .qr-status-info span {
+    #sign-container .qr-status-info span {
         font-weight: 600;
-        color: <?= $qrTextColor ?> !important;
     }
 
-    /* Заголовок на экране QR (чтобы тоже был контрастным) */
-    .qr-header-title {
-        color: <?= $qrTextColor ?> !important;
+    #sign-container .qr-header-title {
         margin: 0;
         font-size: 54px;
         line-height: 1.2;
     }
+
+    /**/
+    /* Ограничиваем контейнер, в который QRCreator вставляет код */
+    #qr-container {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 350px; /* Фиксируем максимальный размер самого кода */
+        margin: 0 auto;
+        aspect-ratio: 1 / 1; /* Гарантируем квадрат */
+    }
+
+    /* Принудительно ограничиваем холст (canvas), который генерит библиотека */
+    #qr-container canvas,
+    #qr-container img {
+        width: 100% !important;
+        height: auto !important;
+        max-width: 100% !important;
+        display: block;
+    }
+
+    /* Белый блок-подложка */
+    .qr-code-block {
+        background: #fff;
+        padding: 30px;
+        border-radius: 24px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 420px; /* Ограничиваем ширину белого облака */
+        margin: 0 auto;
+        box-sizing: border-box;
+    }
+
 </style>
+
+
