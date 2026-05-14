@@ -77,6 +77,11 @@ class Api extends Model
         $data = $this->request('getAppointments', $params);
         return $data;
     }
+    public function getPaymentLink($params = [])
+    {
+        $data = $this->request('getPaymentLink', $params);
+        return $data;
+    }
 
     public function getPatient($params = [])
     {
