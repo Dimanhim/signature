@@ -1,0 +1,16 @@
+@font-face {
+    font-weight: 400;
+    font-family: "Ubuntu";
+    font-style: normal;
+    src: url("../../fonts/Ubuntu/Ubuntu-Regular.ttf") format("truetype");
+    font-display: swap;
+}
+body {
+    position: relative;
+    color: #161616;
+    font-weight: 400;
+    font-size: 18px;
+    font-family: "Ubuntu";
+    line-height: 1.56;
+    background-color: #ffffff;
+}

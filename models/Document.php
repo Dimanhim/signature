@@ -90,7 +90,7 @@ class Document extends BaseModel
 
     public function afterFind()
     {
-        $this->custom_params = json_decode($this->custom_params, true) ?: [];
+        $this->custom_params = $this->custom_params ? json_decode($this->custom_params, true) : [];
 
         return parent::afterFind();
     }
