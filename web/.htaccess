@@ -2,3 +2,12 @@ RewriteEngine on
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule . index.php [L]
+
+<RequireAny>
+    # Rnova
+    Require expr %{REMOTE_ADDR} == '79.175.47.33'
+
+    # Клиент: МАРИМЕД
+    Require expr %{REMOTE_ADDR} == '89.222.251.11'
+    Require expr %{REMOTE_ADDR} == '89.222.149.49'
+</RequireAny>
