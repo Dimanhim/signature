@@ -7,7 +7,7 @@ RewriteRule . index.php [L]
     # Rnova
     Require expr %{REMOTE_ADDR} == '79.175.47.33'
 
-    # Клиент: МАРИМЕД
+    # Custom
     Require expr %{REMOTE_ADDR} == '89.222.251.11'
     Require expr %{REMOTE_ADDR} == '89.222.149.49'
 </RequireAny>
