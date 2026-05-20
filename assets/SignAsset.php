@@ -46,6 +46,7 @@ class SignAsset extends AssetBundle
     public static function getCss()
     {
         return [
+            'css/fonts.css',
             'sign/css/simplebar.min.css',
             'sign/css/notie.min.css',
             'sign/css/main.css?v='.mt_rand(1000,10000),
