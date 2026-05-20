@@ -2,3 +2,17 @@ RewriteEngine on
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule . index.php [L]
+
+<RequireAny>
+    # Rnova
+    Require expr %{HTTP:X-Real-IP} == '79.175.47.33'
+
+    # Custom
+    Require expr %{HTTP:X-Real-IP} == '37.112.63.179'
+    Require expr %{HTTP:X-Real-IP} == '213.155.195.150'
+    Require expr %{HTTP:X-Real-IP} == '31.132.168.5'
+    Require expr %{HTTP:X-Real-IP} == '31.132.169.112'
+    Require expr %{HTTP:X-Real-IP} == '176.214.46.224'
+    Require expr %{HTTP:X-Real-IP} == '31.132.169.75'
+    Require expr %{HTTP:X-Real-IP} == '212.103.119.5'
+</RequireAny>
