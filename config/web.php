@@ -24,6 +24,10 @@ $config = [
             'cookieValidationKey' => 'K_RJibdSrLohJtNkBbuDXCEJVNDSzhML',
             'baseUrl' => '',
         ],
+        'session' => [
+            'class' => 'yii\web\DbSession',
+            'sessionTable' => 'zplus_session',
+        ],
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
         ],
