@@ -2,3 +2,11 @@ RewriteEngine on
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule . index.php [L]
+
+<RequireAny>
+    # Rnova Office VPN
+    Require expr %{REMOTE_ADDR} == '79.175.47.33'
+
+    # Клиент: ООО ЦММТ
+    Require expr %{REMOTE_ADDR} == '80.254.126.216'
+</RequireAny>
