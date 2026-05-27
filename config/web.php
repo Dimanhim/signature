@@ -19,6 +19,43 @@ $config = [
         '@pdf' => '@app/pdf',
     ],
     'components' => [
+        'assetManager' => [
+            'bundles' => [
+                'kartik\editors\assets\SummernoteAsset' => [
+                    'sourcePath' => null,
+                    'baseUrl' => '@web/summernote',
+                    'css' => ['css/summernote-bs4.css'],
+                    'js' => ['js/summernote-bs4.js'],
+                ],
+                'kartik\editors\assets\SummernoteLanguageAsset' => [
+                    'sourcePath' => null,
+                    'baseUrl' => '@web/summernote',
+                    'js' => ['lang/summernote-ru-RU.js'],
+                ],
+                'kartik\editors\assets\CodemirrorAsset' => [
+                    'sourcePath' => null,
+                    'baseUrl' => '@web/summernote',
+                    'css' => ['css/codemirror.css'],
+                    'js' => [
+                        'js/codemirror.js',
+                        'formatting.js', // Добавляем файл форматирования в стабильный локальный бандл
+                    ],
+                ],
+                'kartik\editors\assets\CodemirrorModeAsset' => [
+                    'sourcePath' => null,
+                    'baseUrl' => '@web/summernote',
+                    'css' => [],
+                    'js' => [
+                        'mode/xml/xml.js',
+                    ],
+                ],
+
+                'kartik\editors\assets\CodemirrorFormatterAsset' => false,
+            ],
+        ],
+
+
+
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'K_RJibdSrLohJtNkBbuDXCEJVNDSzhML',

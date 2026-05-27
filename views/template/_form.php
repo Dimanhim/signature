@@ -15,6 +15,17 @@ use kartik\editors\Summernote;
 /** @var yii\widgets\ActiveForm $form */
 
 $templateId = $model->id;
+
+// В начале файла формы или в AppAsset:
+//$this->registerCssFile('/summernote/css/summernote-bs4.css');
+//$this->registerCssFile('/summernote/css/codemirror.css');
+//
+//$this->registerJsFile('/summernote/js/summernote-bs4.js', ['depends' => [\yii\web\JqueryAsset::class]]);
+//$this->registerJsFile('/summernote/js/summernote-ru-RU.js', ['depends' => [\yii\web\JqueryAsset::class]]);
+//$this->registerJsFile('/summernote/js/codemirror.js', ['depends' => [\yii\web\JqueryAsset::class]]);
+//$this->registerJsFile('/summernote/js/codemirror_xml.js', ['depends' => [\yii\web\JqueryAsset::class]]);
+//$this->registerJsFile('/summernote/js/codemirror_formatting.js', ['depends' => [\yii\web\JqueryAsset::class]]);
+
 ?>
 
 <div class="industry-form">
@@ -76,7 +87,11 @@ $templateId = $model->id;
             <div class="card">
                 <div class="card-body">
                     <div class="form-content-box">
-                        <?= $form->field($model, 'content')->widget(Summernote::className(), []) ?>
+                        <?= $form->field($model, 'content')->widget(Summernote::className(), [
+                            'pluginOptions' => [
+                                    'lang' => 'ru-RU',
+                            ],
+                        ]) ?>
                     </div>
                 </div>
             </div>
