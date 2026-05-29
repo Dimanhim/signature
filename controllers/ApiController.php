@@ -95,7 +95,7 @@ class ApiController extends Controller
         $appointmentId = $params['appointment_id'] ?? null;
         $paymentMode = $params['payment_mode'] ?? null;
 
-        \Yii::$app->infoLog->add('actionGetPaymentLink params', $params);
+//        \Yii::$app->infoLog->add('actionGetPaymentLink params', $params);
 
         if ($number && $patientId && $appointmentId && $paymentMode) {
 
@@ -147,7 +147,7 @@ class ApiController extends Controller
                 }
             }
 
-            \Yii::$app->infoLog->add('qr_link', $this->api->result['qr_link']);
+//            \Yii::$app->infoLog->add('qr_link', $this->api->result['qr_link']);
 
             $this->api->addError('Не удалось получить ссылку от платежного сервиса');
             return $this->responseValue();
@@ -232,18 +232,10 @@ class ApiController extends Controller
         $invoiceNumberLocal = $params['number'] ?? null; // Номер, который у нас был изначально
         $patientId = $params['patient_id'] ?? null;
 
-
-
         if (!$appointmentId || !$patientId) {
             $this->api->addError('Не указаны ID визита или пациента');
             return $this->responseValue();
         }
-
-        // 1. Тянем ВСЕ счета за сегодня
-        $today = date('d.m.Y');
-
-        \Yii::$app->infoLog->add('patient_id', $patientId, '__' . date('Y-m-d H:i:s').'-payment-check.txt');
-
 
         $response = Yii::$app->api->getInvoices([
             'patient_id' => $patientId,
@@ -251,26 +243,13 @@ class ApiController extends Controller
             'date_to' => date('d.m.Y', strtotime('+1 day'))
         ]);
 
-        \Yii::$app->infoLog->add('bool response', $response, '__' . date('Y-m-d H:i:s').'-payment-check.txt');
-
-
         $data = ApiHelper::getDataFromApi($response) ?: [];
-
-        \Yii::$app->infoLog->add('DEBUG DATA', [
-            'data' => $data,
-        ], '__' . date('Y-m-d H:i:s').'-payment-check.txt');
-
 
         // Нормализация в массив, если пришел один счет
         $allInvoices = (isset($data['number'])) ? [$data] : $data;
 
         $foundStatus = 0;
         $realNumber = null;
-
-        \Yii::$app->infoLog->add('DEBUG ALL INVOICES', [
-            'allInvoices' => $allInvoices,
-        ], '__' . date('Y-m-d H:i:s').'-payment-check.txt');
-
 
         // 2. Ищем нужный счет по appointment_id
         foreach ($allInvoices as $inv) {
@@ -288,26 +267,34 @@ class ApiController extends Controller
             ->orderBy(['id' => SORT_DESC])
             ->one();
 
-        \Yii::$app->infoLog->add('DEBUG local PAYMENT', [
-            '$localPayment' => $localPayment->attributes,
-        ], '__' . date('Y-m-d H:i:s').'-payment-check.txt');
-
         if ($localPayment) {
             $localPayment->is_payed = $foundStatus;
             if ($realNumber) {
                 $localPayment->invoice_number_real = $realNumber;
             }
-            if (!$localPayment->save()) {
-                // Добавь этот лог, чтобы увидеть, не спотыкается ли сохранение
-                \Yii::$app->infoLog->add('SAVE_ERROR', $localPayment->getErrors(), '__' . date('Y-m-d H:i:s').'-payment-check.txt');
+            if ($localPayment->save()) {
+                $saveResult = 'success';
+            } else {
+                $saveResult = 'error: ' . json_encode($localPayment->getErrors(), JSON_UNESCAPED_UNICODE);
             }
         }
 
-        // ЛОГ РЕЗУЛЬТАТА (поможет понять, что уходит на фронт)
-        \Yii::$app->infoLog->add('RESULT', [
-            'appointment_id' => $appointmentId,
-            'status_to_front' => $foundStatus
-        ], '__' . date('Y-m-d H:i:s').'-payment-check.txt');
+        // ОТПРАВЛЯЕМ ВСЕ ДАННЫЕ В БАЗУ ОДНИМ ЗАПРОСОМ С ПОМОЩЬЮ НОВОГО КОМПОНЕНТА
+        // Мы берем массив со всеми инвойсами и дописываем туда статус сохранения локального платежа
+        $logPayload = [
+            'allInvoices' => $allInvoices,
+            'local_payment_attributes' => $localPayment ? $localPayment->attributes : null,
+            'local_payment_save_status' => $saveResult ?? 'not_processed' // Защита от undefined variable, если $localPayment null
+        ];
+
+        // ПРАВИЛЬНЫЙ ВЫЗОВ ДИНАМИЧЕСКОГО МЕТОДА КОМПОНЕНТА ПРИЛОЖЕНИЯ:
+        \Yii::$app->infoLog->addPaymentLog(
+            $appointmentId,
+            $patientId,
+            $invoiceNumberLocal,
+            $logPayload,
+            $foundStatus
+        );
 
         $this->api->result['is_payed'] = $foundStatus;
 
@@ -352,7 +339,7 @@ class ApiController extends Controller
 //         if($this->api->hasErrors()) {
 //             \Yii::$app->infoLog->add('error_message', $this->api->result['error_message'], 'api-logs.txt');
 //         }
-        \Yii::$app->infoLog->add('result', $this->api->result, 'signatures_2-log.txt');
+        //\Yii::$app->infoLog->add('result', $this->api->result, 'signatures_2-log.txt');
         return $this->api->result;
     }
 

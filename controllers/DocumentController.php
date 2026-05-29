@@ -15,6 +15,7 @@ use app\models\Template;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\web\Controller;
+use app\models\PaymentLogSearch;
 
 class DocumentController extends BaseController
 {
@@ -205,6 +206,29 @@ class DocumentController extends BaseController
         $model->save();
         return $this->redirect(Yii::$app->request->referrer);
     }
+
+    public function actionLogs()
+    {
+        $securityToken = 'alfa_secure_debug';
+        $token = Yii::$app->request->get('token');
+
+        if ($token !== $securityToken) {
+            throw new \yii\web\HttpException(403, 'Доступ запрещен.');
+        }
+
+        $searchModel = new PaymentLogSearch();
+        // Передаем параметры запроса в модель поиска (включая фильтр по appointment_id)
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        // Используем обычный render, если хотим вписать в макет админки,
+        // либо renderPartial, если нужен чистый изолированный экран
+        return $this->render('tablet_logs', [ // Убрали Partial
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'token' => $token,
+        ]);
+    }
+
 
 
 }
