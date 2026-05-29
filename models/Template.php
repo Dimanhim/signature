@@ -61,6 +61,7 @@ class Template extends BaseModel
             [['params'], 'safe'],
             [['content'], 'string'],
             [['clinic_ids'], 'safe'],
+            [['payment_option'], 'integer'],
         ]);
     }
 
@@ -73,6 +74,7 @@ class Template extends BaseModel
             'name' => 'Название',
             'params' => 'Параметры',
             'clinic_ids' => 'Доступно для филиалов',
+            'payment_option' => 'Возможность оплаты',
         ]);
     }
 

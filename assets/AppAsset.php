@@ -47,6 +47,7 @@ class AppAsset extends AssetBundle
         return [
             'css/awesome/line-awesome-font-awesome.min.css',
             //'css/bootstrap-icons.css',
+            'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.min.css',
             'css/jquery.fancybox.min.css',
             'css/select2.min.css',
             'css/chosen.css',

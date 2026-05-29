@@ -28,6 +28,22 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?= $form->field($model, 'cancel_unsigned')->checkbox(['label' => Html::tag('span','Отменять неподписанные документы'), 'labelOptions' => ['class' => 'ui-checkbox']]) ?>
                         <?= $form->field($model, 'update_on_demand')->checkbox(['label' => Html::tag('span','Обновлять планшеты вручную'), 'labelOptions' => ['class' => 'ui-checkbox']]) ?>
                         <?= $form->field($model, 'send_patient_email')->checkbox(['label' => Html::tag('span','Отправлять пациенту документ на Email'), 'labelOptions' => ['class' => 'ui-checkbox']]) ?>
+
+                        <?= $form->field($model, 'payment_functional', [
+                                'options' => ['class' => 'form-group payment-checkbox-container']
+                        ])->checkbox([
+                                'label' => Html::tag('span', 'Оплата по QR-коду ' . Html::tag('i', '', [
+                                            'class' => 'bi bi-question-circle-fill text-primary payment-tooltip', // для Bootstrap Icons
+                                            'style' => 'cursor: pointer; font-size: 16px; margin-left: 5px;',
+                                            'data-toggle' => 'tooltip',
+                                            'data-placement' => 'top',
+                                            'title' => 'Активирует проверку счетов в МИС по текущему визиту. 
+                                            При наличии одного неоплаченного счета, 
+                                            перед подписанием, на планшете откроется экран с QR-кодом для его оплаты.'
+                                ])),
+                                'labelOptions' => ['class' => 'ui-checkbox']
+                        ]) ?>
+
                         <?= $form->field($model, 'lifetime_days')->textInput()->label('Удалять документы через, дн.') ?>
                         <div class="form-group">
                             <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
@@ -82,3 +98,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php ActiveForm::end(); ?>
 </div>
+<style>
+    .payment-checkbox-container .ui-checkbox input[type="checkbox"]:checked + span::after {
+        top: 11px !important;
+    }
+</style>
+<?php
+$js = <<<JS
+    $('.payment-tooltip').tooltip();
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+?>
+

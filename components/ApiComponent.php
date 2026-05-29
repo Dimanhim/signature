@@ -62,4 +62,21 @@ class ApiComponent extends BaseComponent
     {
         return $this->api->getRequest('uploadFile', $params);
     }
+
+    /**
+     * Получить список счетов пациента из МИС Rnova
+     */
+    public function getInvoices($params = [])
+    {
+        return $this->api->getRequest('getInvoices', $params);
+    }
+
+    /**
+     * Запросить у МИС Rnova платежную ссылку (QR-код) для счета
+     */
+    public function getPaymentLink($params = [])
+    {
+        return $this->api->getRequest('getPaymentLink', $params);
+    }
+
 }

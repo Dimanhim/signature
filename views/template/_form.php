@@ -71,6 +71,18 @@ $templateId = $model->id;
                             'size' => 7,
                         ]
                     ) ?>
+                    <?= $form->field($model, 'payment_option', [
+                            'options' => ['class' => 'form-group template-payment-container']
+                    ])->checkbox([
+                            'label' => Html::tag('span', 'Требовать оплату перед подписанием ' . Html::tag('i', '', [
+                                            'class' => 'bi bi-question-circle-fill text-primary template-payment-tooltip',
+                                            'style' => 'cursor: pointer; font-size: 14px; margin-left: 5px; display: inline-block; vertical-align: middle; margin-top: -2px;',
+                                            'data-toggle' => 'tooltip',
+                                            'data-placement' => 'top',
+                                            'title' => "Активирует проверку счетов в МИС конкретно для этого шаблона документа.\nЕсли у пациента есть неоплаченный счет по визиту, планшет заблокирует подписание и покажет QR-код."
+                                    ])),
+                            'labelOptions' => ['class' => 'ui-checkbox']
+                    ]) ?>
                     <div class="form-group mt10">
                         <?= Html::submitButton('Сохранить', ['class' => 'btn btn-success']) ?>
                     </div>
@@ -151,3 +163,21 @@ $templateId = $model->id;
     </div>
     <?php ActiveForm::end(); ?>
 </div>
+<style>
+    /* Корректируем положение серого куба чекбокса в шаблонах */
+    .template-payment-container .ui-checkbox input[type="checkbox"] + span::before {
+        top: -2px !important;
+    }
+    /* Точный фикс положения внутренней галочки (как в настройках) */
+    .template-payment-container .ui-checkbox input[type="checkbox"]:checked + span::after {
+        top: 5px !important;
+    }
+</style>
+
+<?php
+// Инициализируем плагин тултипа для этой иконки
+$js = <<<JS
+    $('.template-payment-tooltip').tooltip();
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+?>

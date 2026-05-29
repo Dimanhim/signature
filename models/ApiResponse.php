@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\models\Document;
 use app\models\Setting;
+use app\components\ApiHelper;
 use Yii;
 
 class ApiResponse
@@ -16,6 +17,10 @@ class ApiResponse
         'error_message' => null,
         'message' => null,
         'data' => [],
+        'appointment' => [],
+        'invoices' => [],
+        'qr_link' => null,
+        'is_payed' => 0,
     ];
 
     public function getDocuments()
@@ -43,6 +48,10 @@ class ApiResponse
         if($data) {
             $this->result['data'] = $data;
         }
+
+        // ВСТАВКА ДЛЯ ОПЛАТЫ: собираем счета, если документ найден
+        $this->getAppointment();
+        $this->getInvoices();
     }
 
     public function getSettings() {
@@ -90,6 +99,89 @@ class ApiResponse
         }
     }
 
+    /**
+     * Получить данные визита из МИС по документу
+     */
+    public function getAppointment()
+    {
+        // Если функционал оплаты отключен в настройках, ничего не делаем
+        if (!(bool)\Yii::$app->settings->getParam('payment_functional')) {
+            return false;
+        }
+
+        $appointmentId = $this->result['data'][0]['appointment_id'] ?? null;
+        if (!$appointmentId) return false;
+
+        try {
+            $response = Yii::$app->api->getAppointments(['appointment_id' => $appointmentId]);
+            $data = ApiHelper::getDataFromApi($response);
+            $this->result['appointment'] = $data[0] ?? null;
+        } catch (\Exception $e) {
+            \Yii::$app->infoLog->add('ApiResponse getAppointment Error', $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Собрать и отфильтровать неоплаченные счета пациента
+     */
+    public function getInvoices()
+    {
+        // Если функционал оплаты отключен в настройках, ничего не делаем
+        if (!(bool)\Yii::$app->settings->getParam('payment_functional')) {
+            return false;
+        }
+
+        $services = $this->result['appointment']['services'] ?? null;
+        if (!$services) return false;
+
+        $invoiceNumbers = [];
+        foreach ($services as $service) {
+            if (!empty($service['invoice_number'])) {
+                $invoiceNumbers[] = $service['invoice_number'];
+            }
+        }
+
+        if (!$invoiceNumbers) {
+            $this->result['invoices'] = [];
+            return false;
+        }
+
+        try {
+            // Запрашиваем счета в МИС с широким диапазоном дат, как в Альфе
+            $invoices = Yii::$app->api->getInvoices([
+                'number' => $invoiceNumbers,
+                //'date_from' => '01.01.2000',
+                //'date_to' => '01.01.2050'
+            ]);
+
+            $allInvoices = ApiHelper::getDataFromApi($invoices) ?: [];
+
+            // НОРМАЛИЗАЦИЯ: если пришел один счет как объект (ассоциативный массив), оборачиваем его в индексный массив
+            $invoicesList = (isset($allInvoices['number'])) ? [$allInvoices] : $allInvoices;
+
+            if (!$invoicesList && !is_array($allInvoices)) {
+                $this->result['invoices'] = [];
+                return false;
+            }
+
+            // Отбираем только неоплаченные счета (статус не равен 2)
+            $unpaid = [];
+            foreach ($invoicesList as $inv) {
+                if (isset($inv['status_code']) && (int)$inv['status_code'] !== 2) {
+                    $unpaid[] = $inv;
+                }
+            }
+
+            $this->result['invoices'] = $unpaid;
+        } catch (\Exception $e) {
+            \Yii::$app->infoLog->add('ApiResponse getInvoices Error', $e->getMessage());
+            $this->result['invoices'] = [];
+            return false;
+        }
+    }
+
+
 
 
 
@@ -104,6 +196,10 @@ class ApiResponse
     public function hasErrors()
     {
         return $this->result['error'];
+    }
+    public function addMessage($message = null)
+    {
+    $this->result['message'] = $message;
     }
     public function addError($errorMessage)
     {
