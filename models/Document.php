@@ -608,11 +608,11 @@ class Document extends BaseModel
         }
 
         //$cssFileName = \Yii::getAlias('@app/web').'/css/pdf.css';
-        // $cssFileName = \Yii::getAlias('@app/web').'/css/pdf-styles.css';
+        $cssFileName = \Yii::getAlias('@app/web').'/css/pdf-styles.css';
         $pdf = \Yii::$app->pdf;
         $pdf->content = $this->content;
         $pdf->destination = Pdf::DEST_FILE;
-        // $pdf->cssFile = $cssFileName;
+        $pdf->cssFile = $cssFileName;
         $pdf->cssInline = Setting::findOne(['key' => 'document_css'])->value ?? '';
 
         $dopText = $empty ? '_empty' : '';
@@ -634,6 +634,7 @@ class Document extends BaseModel
                         'title' => $this->document_name,
                         'patient_id' => $this->patient_id,
                         'type' => 'pdf',
+                        'document_type' => 'admin',
                     ];
                     $response = Yii::$app->api->uploadFile($params);
                     if(!$data = ApiHelper::getDataFromApi($response)) {

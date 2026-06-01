@@ -45,8 +45,8 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <?php if($fileName = $model->getImageByName($imageName)) : ?>
                                             <div class="img-container">
                                                 <div class="img-content">
-                                                    <a href="/tablet/img/<?= $fileName ?>" data-fancybox>
-                                                        <img src="/tablet/img/<?= $fileName ?>" alt="">
+                                                    <a href="/sign/img/<?= $fileName ?>" data-fancybox>
+                                                        <img src="/sign/img/<?= $fileName ?>" alt="">
                                                     </a>
                                                 </div>
                                                 <div class="img-action">

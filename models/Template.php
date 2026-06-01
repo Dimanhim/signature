@@ -147,6 +147,7 @@ class Template extends BaseModel
 
                 'services_no_price' => 'список_услуг_без_цены',
                 'price_full' => 'сумма_услуг',
+                'price_full_words' => 'сумма_услуг_(прописью)',
 
                 //'invoice_payment_title' => 'способ_оплаты_счета',
                 'user_name_short' => 'фио_текущего_сотрудника_(сокращенное)',
